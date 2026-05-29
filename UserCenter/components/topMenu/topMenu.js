@@ -159,11 +159,14 @@ const topMenu = {
           </div>
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item command="account">{{lang.topMenu_text2}}</el-dropdown-item>
+            <el-dropdown-item command="strategy" v-if="isShowLevel" v-plugin="'IdcsmartClientLevel'">{{lang.topMenu_text8}}</el-dropdown-item>
             <el-dropdown-item command="quit">{{lang.topMenu_text3}}</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
       </div>
-      <coin-active ref="coinActive" v-plugin="'Coin'"></coin-active>
+      <coin-active ref="coinActive" v-plugin="['Coin', 'PresaleConsult']"></coin-active>
+      <!-- 用户等级详情弹窗 -->
+      <client-level-dialog ref="levelDialog"></client-level-dialog>
     </div>
   </el-header>
 </div>
@@ -173,13 +176,20 @@ const topMenu = {
       inserted: function (el, binding) {
         const addonsDom = document.querySelector("#addons_js");
         let addonsArr = [];
-        let arr = [];
+
+        // 兼容单个或多个插件
+        const plugins = Array.isArray(binding.value)
+          ? binding.value
+          : [binding.value];
+
         if (addonsDom) {
-          addonsArr = JSON.parse(addonsDom.getAttribute("addons_js")) || []; // 插件列表
-          // 判断是否安装了某插件
-          arr = addonsArr.filter((item) => item.name === binding.value);
-          if (arr.length === 0) {
-            // 未安装 移除该元素的dom
+          addonsArr = JSON.parse(addonsDom.getAttribute("addons_js")) || [];
+
+          const hasPlugin = plugins.some((name) =>
+            addonsArr.some((item) => item.name === name)
+          );
+
+          if (!hasPlugin) {
             el.parentNode.removeChild(el);
           }
         } else {
@@ -190,8 +200,9 @@ const topMenu = {
   },
   components: {
     coinActive,
+    clientLevelDialog
   },
-  data () {
+  data() {
     return {
       topInput: "",
       // curSrc: url+'/img/common/'+lang_obj.countryImg+'.png' ,
@@ -245,6 +256,7 @@ const topMenu = {
         "hsla(209, 100%, 56%, 0.73)",
         "#c7158577",
       ],
+      isShowLevel: false
     };
   },
   props: {
@@ -262,14 +274,14 @@ const topMenu = {
     },
   },
   watch: {
-    num (val) {
+    num(val) {
       if (val) {
         this.shoppingCarNum = val;
       }
     },
   },
   filters: {
-    formateTime (time) {
+    formateTime(time) {
       if (time && time !== 0) {
         const date = new Date(time * 1000);
         Y = date.getFullYear() + "-";
@@ -289,13 +301,13 @@ const topMenu = {
       }
     },
   },
-  created () {
+  created() {
     this.GetIndexData();
     this.doGetMenu();
     this.getCartList();
     this.getCommonSetting();
   },
-  mounted () {
+  mounted() {
     // 不生效
     this.color1 = getComputedStyle(document.documentElement)
       .getPropertyValue("--color-primary")
@@ -306,7 +318,7 @@ const topMenu = {
     }
   },
   methods: {
-    getPluginId (pluginName) {
+    getPluginId(pluginName) {
       const addonsDom = document.querySelector("#addons_js");
       if (addonsDom) {
         const addonsArr = JSON.parse(addonsDom.getAttribute("addons_js")); // 插件列表
@@ -320,10 +332,10 @@ const topMenu = {
         console.log("请检查页面是否有插件dom");
       }
     },
-    goAccount () {
+    goAccount() {
       location.href = "/account.htm?type=3";
     },
-    getMessageList () {
+    getMessageList() {
       messageInfo().then((res) => {
         this.msgList = res.data.data.credit_limit.list;
         this.msgCount = res.data.data.credit_limit.count;
@@ -333,13 +345,13 @@ const topMenu = {
         }, {});
       });
     },
-    goMsgDetail (id) {
+    goMsgDetail(id) {
       location.href = `/plugin/${getPluginId(
         "ClientCare"
       )}/msgDetail.htm?id=${id}`;
     },
     // 退出登录
-    logOut () {
+    logOut() {
       this.$confirm(lang.topMenu_text4, lang.topMenu_text5, {
         confirmButtonText: lang.topMenu_text6,
         cancelButtonText: lang.topMenu_text7,
@@ -356,10 +368,10 @@ const topMenu = {
         })
         .catch(() => { });
     },
-    goLogin () {
+    goLogin() {
       location.href = "/login.htm";
     },
-    goHome () {
+    goHome() {
       localStorage.frontMenusActiveId = "";
       const openUrl = this.commonData.clientarea_logo_url || "/home.htm";
       if (this.commonData.clientarea_logo_url_blank == 1) {
@@ -370,7 +382,7 @@ const topMenu = {
     },
 
     // 获取购物车数量
-    getCartList () {
+    getCartList() {
       cartList()
         .then((res) => {
           this.shoppingCarNum = res.data.data.list.filter(
@@ -381,11 +393,15 @@ const topMenu = {
           this.$message.error(err.data.msg);
         });
     },
-    GetIndexData () {
+    GetIndexData() {
       accountDetail()
         .then((res) => {
           if (res.data.status == 200) {
             this.accountData = res.data.data.account;
+            // 判断是否显示 等级策略
+            if (this.accountData?.customfield?.idcsmart_client_level?.type !== 0) {
+              this.isShowLevel = true;
+            }
             localStorage.lang = res.data.data.account.language || "zh-cn";
             this.firstName = res.data.data.account.username
               .substring(0, 1)
@@ -406,15 +422,15 @@ const topMenu = {
           this.isGetData = true;
         });
     },
-    goShoppingCar () {
+    goShoppingCar() {
       localStorage.frontMenusActiveId = "";
       location.href = "/cart/shoppingCar.htm";
     },
-    goAccountpage () {
+    goAccountpage() {
       location.href = "/account.htm";
     },
     // 语言切换
-    changeLang (e) {
+    changeLang(e) {
       if (localStorage.getItem("lang") !== e || !localStorage.getItem("lang")) {
         localStorage.setItem("lang", e);
         sessionStorage.setItem("brow_lang", e);
@@ -427,7 +443,7 @@ const topMenu = {
         }
       }
     },
-    async changeLangHandle (e) {
+    async changeLangHandle(e) {
       try {
         const res = await changeLanguage({
           language: e,
@@ -439,7 +455,7 @@ const topMenu = {
       }
     },
     // 编辑基础资料
-    saveAccount () {
+    saveAccount() {
       const params = {
         ...this.accountData,
       };
@@ -454,17 +470,19 @@ const topMenu = {
           this.$message.error(error.data.msg);
         });
     },
-    handleCommand (e) {
+    handleCommand(e) {
       if (e == "account") {
         this.goAccountpage();
       }
       if (e == "quit") {
         this.logOut();
       }
-      console.log(e);
+      if (e == "strategy") {
+        this.$refs.levelDialog.open();
+      }
     },
     // 全局搜索
-    querySearchAsync (queryString, cb) {
+    querySearchAsync(queryString, cb) {
       if (queryString.length == 0) {
         return false;
       }
@@ -492,7 +510,7 @@ const topMenu = {
      * @param {Number} id 菜单id 或者url
      * @return {String} url 菜单url
      */
-    getMenuUrl (id) {
+    getMenuUrl(id) {
       const temp =
         this.originMenu.find((item) => item.id == id || item.url == id) || {};
       const reg =
@@ -507,7 +525,7 @@ const topMenu = {
       }
       return url;
     },
-    handleSelect (id) {
+    handleSelect(id) {
       localStorage.setItem("frontMenusActiveId", id);
       const temp =
         this.originMenu.find((item) => item.id == id || item.url == id) || {};
@@ -524,14 +542,14 @@ const topMenu = {
       }
       location.href = "/" + temp.url;
     },
-    showMenu () {
+    showMenu() {
       this.isShowMenu = true;
     },
-    handleClose () {
+    handleClose() {
       this.isShowMenu = false;
     },
     // 获取前台导航
-    doGetMenu () {
+    doGetMenu() {
       getMenu().then((res) => {
         if (res.data.status === 200) {
           res.data.data.menu.forEach((item) => {
@@ -558,7 +576,7 @@ const topMenu = {
       });
     },
     // 判断当前菜单激活
-    setActiveMenu () {
+    setActiveMenu() {
       const originUrl = location.pathname.slice(1);
       const allUrl = originUrl + location.search;
       let flag = false;
@@ -593,12 +611,12 @@ const topMenu = {
       }
     },
     // 页面跳转
-    toPage (e) {
+    toPage(e) {
       location.href = "/" + e.url;
     },
 
     // 获取通用配置
-    async getCommonSetting () {
+    async getCommonSetting() {
       try {
         if (!localStorage.getItem("common_set_before")) {
           const res = await getCommon();

@@ -10,6 +10,7 @@
         <div class="ddr ddr4"></div>
         <div class="ddr ddr5"></div>
     </div>
+
     <div class="template">
         <div id="forget">
             <div class="login-container">
@@ -75,14 +76,14 @@
                                         :placeholder="lang.email_code">
                                     </el-input>
                                     <count-down-button v-show="isEmailOrPhone" key="emailCodebtn" ref="emailCodebtn"
-                                        @click.native="sendEmailCode" my-class="code-btn">
+                                        :loading="emailCodeLoading" @click.native="sendEmailCode" my-class="code-btn">
                                     </count-down-button>
                                     <!-- 手机验证码 -->
                                     <el-input v-show="!isEmailOrPhone" v-model="formData.phoneCode"
                                         :placeholder="lang.login_phone_code">
                                     </el-input>
                                     <count-down-button v-show="!isEmailOrPhone" key="phoneCodebtn" ref="phoneCodebtn"
-                                        @click.native="sendPhoneCode" my-class="code-btn">
+                                        :loading="phoneCodeLoading" @click.native="sendPhoneCode" my-class="code-btn">
                                     </count-down-button>
                                 </div>
                                 <div class="form-item">

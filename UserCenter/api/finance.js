@@ -1,11 +1,11 @@
 // 	订单列表
 function orderList(params) {
-  return Axios.get("/order", {params});
+  return Axios.get("/order", { params });
 }
 
 // 交易记录列表
 function transactionList(params) {
-  return Axios.get(`/transaction`, {params});
+  return Axios.get(`/transaction`, { params });
 }
 
 // 订单详情
@@ -15,7 +15,7 @@ function orderDetails(id) {
 
 // 余额记录列表
 function creditList(params) {
-  return Axios.get(`/credit`, {params});
+  return Axios.get(`/credit`, { params });
 }
 // 公共配置
 function common() {
@@ -34,7 +34,7 @@ function withdraw(params) {
 
 // 提现规则详情
 function withdrawRule(params) {
-  return Axios.get(`/withdraw/rule/credit`, {params});
+  return Axios.get(`/withdraw/rule/credit`, { params });
 }
 
 // 充值
@@ -73,7 +73,7 @@ function delete_order(id) {
 
 // 批量删除订单
 function batchDeleteOrder(params) {
-  return Axios.delete(`/order`, {params});
+  return Axios.delete(`/order`, { params });
 }
 
 // // 使用余额支付
@@ -83,12 +83,12 @@ function batchDeleteOrder(params) {
 
 // 代金券
 // 可领代金券列表
-function voucherAvailable({params}) {
-  return Axios.get(`/voucher`, {params});
+function voucherAvailable(params) {
+  return Axios.get(`/voucher`, { params });
 }
 
 function voucherMine(params) {
-  return Axios.get(`/voucher/mine`, {params});
+  return Axios.get(`/voucher/mine`, { params });
 }
 
 function voucherGet(params) {
@@ -101,11 +101,11 @@ function combineOrder(params) {
 
 /* 申请合同列表 */
 function contractOrder(params) {
-  return Axios.get(`/e_contract/order`, {params});
+  return Axios.get(`/e_contract/order`, { params });
 }
 /* 合同管理列表 */
 function contractList(params) {
-  return Axios.get(`/e_contract`, {params});
+  return Axios.get(`/e_contract`, { params });
 }
 
 /* 保存甲方信息 */
@@ -144,7 +144,7 @@ function certificationInfo() {
 
 // 出账列表
 function creditLimtList(params) {
-  return Axios.get(`/credit_limit/account`, {params});
+  return Axios.get(`/credit_limit/account`, { params });
 }
 
 // 授信详情
@@ -154,7 +154,7 @@ function creditDetail() {
 
 //出账周期订单列表
 function creditOrderList(params) {
-  return Axios.get(`/credit_limit/account/${params.id}/order`, {params});
+  return Axios.get(`/credit_limit/account/${params.id}/order`, { params });
 }
 
 // 信用额提前还款
@@ -164,17 +164,17 @@ function prePayment() {
 
 // 冻结记录
 function apiFreezeList(params) {
-  return Axios.get(`/account/credit/freeze`, {params});
+  return Axios.get(`/account/credit/freeze`, { params });
 }
 
 // 用户可用平台币详情
 function apiCoinCoupon(params) {
-  return Axios.get(`/coin/client/coupon`, {params});
+  return Axios.get(`/coin/client/coupon`, { params });
 }
 
 // 待领取平台币列表
 function apiCoinWaitList(params) {
-  return Axios.get(`/coin/wait_get`, {params});
+  return Axios.get(`/coin/wait_get`, { params });
 }
 
 // 领取平台币
@@ -184,12 +184,12 @@ function apiCoinGet(params) {
 
 // 平台币列表
 function apiCoinList(params) {
-  return Axios.get(`/coin/coupon`, {params});
+  return Axios.get(`/coin/coupon`, { params });
 }
 
 // 获取平台币使用详情
 function apiCoinUseDetail(params) {
-  return Axios.get(`/coin/coupon/${params.id}/use_detail`, {params});
+  return Axios.get(`/coin/coupon/${params.id}/use_detail`, { params });
 }
 
 // 订单列表导出EXCEL

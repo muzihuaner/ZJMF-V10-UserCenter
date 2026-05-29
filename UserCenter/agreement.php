@@ -10,6 +10,7 @@
         <div class="ddr ddr4"></div>
         <div class="ddr ddr5"></div>
     </div>
+
     <div id="content" class="template">
         <div class="contnet-right-out">
             <div class="content-right" v-show="detailData.id" v-loading="contentLoading">

@@ -5,7 +5,6 @@
 </head>
 
 <body>
-  <!-- mounted之前显示 -->
   <div id="mainLoading">
     <div class="ddr ddr1"></div>
     <div class="ddr ddr2"></div>
@@ -13,6 +12,7 @@
     <div class="ddr ddr4"></div>
     <div class="ddr ddr5"></div>
   </div>
+
   <div class="template" id="finance">
     <el-container>
       <aside-menu @getruleslist="getRule"></aside-menu>
@@ -1100,73 +1100,7 @@
           </div>
         </el-dialog>
         <!-- 甲方信息管理弹窗 -->
-        <el-dialog width="6.8rem" :visible.sync="isShowInfoDia" :show-close="false" @close="infoClose"
-          class="info-dialog">
-          <div class="dialog-title">{{lang.finance_text59}}</div>
-          <div class="dialog-dec">
-            <p>{{lang.finance_text60}}</p>
-            <p>{{lang.finance_text61}}</p>
-          </div>
-          <div class="dialog-box">
-            <el-form :model="infoFormData" class="info-form" :rules="infoRules" ref="infoForm" label-position="top">
-              <!-- <div class="certification-info" v-if="false">
-                <div class="kd-item"><span class="kd-label">{{lang.finance_text62}}:</span>
-                  <span class="kd-value" v-if="certificationObj.company.status === 1">{{certificationObj.company.certification_company}}</span>
-                  <span class="kd-value" v-else-if="certificationObj.person.status === 1">{{certificationObj.person.card_name}}</span>
-                </div>
-                <div class="kd-item"><span class="kd-label">{{lang.finance_text63}}:</span>
-                  <span class="kd-value" v-if="certificationObj.company.status === 1">{{certificationObj.company.company_organ_code}}</span>
-                  <span class="kd-value" v-else-if="certificationObj.person.status === 1">{{certificationObj.person.card_number}}</span>
-                </div>
-              </div> -->
-              <el-form-item :label="lang.finance_text64" prop="name">
-                <el-input v-model="infoFormData.name" :placeholder="lang.finance_text65"></el-input>
-              </el-form-item>
-              <el-form-item :label="lang.finance_text66" prop="id_number">
-                <el-input v-model="infoFormData.id_number" :placeholder="lang.finance_text65"></el-input>
-              </el-form-item>
-              <el-form-item :label="lang.finance_text67" prop="contact_phone">
-                <el-input v-model="infoFormData.contact_phone" :placeholder="lang.finance_text65"></el-input>
-              </el-form-item>
-              <el-form-item :label="lang.finance_text68" prop="contact_email">
-                <el-input v-model="infoFormData.contact_email" :placeholder="lang.finance_text65"></el-input>
-              </el-form-item>
-              <el-form-item :label="lang.finance_text69" prop="contact_address">
-                <el-input v-model="infoFormData.contact_address" :placeholder="lang.finance_text65"></el-input>
-              </el-form-item>
-              <!-- 客户签章： infoFormData.company_seal_required 为真时必填 -->
-              <el-form-item :label="lang.finance_text149" prop="company_seal" v-if="infoFormData.company_seal_required">
-                <el-upload class="seal-upload" action="/console/v1/upload" :headers="{Authorization: jwt}"
-                  :show-file-list="false" :on-success="handleSealSuccess" :on-preview="handleSealPreview"
-                  :before-upload="beforeSealUpload" accept="image/jpeg,image/jpg,image/png">
-                  <div class="seal-upload-content" v-if="infoFormData.company_seal_url">
-                    <img :src="infoFormData.company_seal_url" class="seal-image">
-                    <div class="seal-mask">
-                      <div class="seal-mask-actions">
-                        <i class="el-icon-zoom-in" @click.stop="handleSealPreview"></i>
-                        <i class="el-icon-delete" @click.stop="handleSealDelete"></i>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="seal-upload-placeholder" v-else>
-                    <i class="el-icon-plus"></i>
-                    <div class="seal-upload-text">{{lang.finance_text150}}</div>
-                    <div class="seal-upload-tip">{{lang.finance_text151}}</div>
-                  </div>
-                </el-upload>
-              </el-form-item>
-              <!-- 图片预览对话框 -->
-              <el-dialog :visible.sync="sealPreviewVisible" width="600px" append-to-body>
-                <img :src="infoFormData.company_seal_url" style="width: 100%; display: block;">
-              </el-dialog>
-              <span class="first-save-tip" v-if="!infoFormData.is_save">{{lang.finance_text158}}</span>
-            </el-form>
-          </div>
-          <div class="dialog-fotter">
-            <el-button class="save-btn" @click="saveInfoData">{{lang.finance_text70}}</el-button>
-            <el-button class="cancel-btn" @click="infoClose">{{lang.finance_text71}}</el-button>
-          </div>
-        </el-dialog>
+        <contract-info ref="contractInfo"></contract-info>
         <!-- 取消申请弹窗 -->
         <el-dialog width="4.5rem" :visible.sync="isShowCancel" :show-close="false" @close="cancelClose"
           class="cancel-dialog">
@@ -1376,5 +1310,6 @@
   <script src="/{$template_catalog}/template/{$themes}/components/rechargeDialog/rechargeDialog.js"></script>
   <script src="/{$template_catalog}/template/{$themes}/components/pagination/pagination.js"></script>
   <script src="/{$template_catalog}/template/{$themes}/components/withdrawDialog/withdrawDialog.js"></script>
+  <script src="/{$template_catalog}/template/{$themes}/components/contractInfo/contractInfo.js"></script>
 
   {include file="footer"}

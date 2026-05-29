@@ -45,7 +45,34 @@ input::-webkit-inner-spin-button {
 }
 
 
+.pro-des-loading {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  background: transparent;
+  z-index: 6;
 
+  &::before {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: calc(100% - 200px);
+    height: 100%;
+    background: #fff;
+  }
+
+  /* 加载中 开始 */
+  #mainLoading {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
 
 /* 加载中 开始 */
 #mainLoading {
@@ -3691,12 +3718,17 @@ th {
 
 // 安全验证
 .security-dialog {
+
+  i {
+    font-size: 0.16rem !important;
+  }
+
   .el-dialog__header {
     display: none;
   }
 
   .el-dialog__body {
-    padding: 0;
+    padding: 0 !important;
   }
 
   .security-title {

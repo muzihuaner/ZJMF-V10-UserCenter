@@ -61,6 +61,8 @@
           security_verify_value: "", // 安全验证值
           certify_id: "", // 认证ID
           security_verify_token: "",
+          emailCodeLoading: false,
+          phoneCodeLoading: false,
         };
       },
       // 计算钩子
@@ -228,7 +230,7 @@
         // 登录
         doLogin() {
           let isPass = true;
-          const form = {...this.formData};
+          const form = { ...this.formData };
           // 邮件登录验证
           if (this.isEmailOrPhone) {
             if (!form.email) {
@@ -453,6 +455,9 @@
         },
         // 发送邮箱验证码
         sendEmailCode(isAuto = false) {
+          if (this.emailCodeLoading) {
+            return;
+          }
           const form = this.formData;
           if (!form.email) {
             this.errorText = lang.login_text1;
@@ -476,6 +481,7 @@
             return;
           }
           this.errorText = "";
+          this.emailCodeLoading = true;
           const params = {
             action: "login",
             email: form.email,
@@ -487,16 +493,21 @@
               if (res.data.status === 200) {
                 // 执行倒计时
                 this.$refs.emailCodebtn.countDown();
+                this.emailCodeLoading = false;
               }
             })
             .catch((err) => {
               this.errorText = err.data.msg;
               this.token = "";
               this.captcha = "";
+              this.emailCodeLoading = false;
             });
         },
         // 发送手机短信
         sendPhoneCode(isAuto = false) {
+          if (this.phoneCodeLoading) {
+            return;
+          }
           const form = this.formData;
           if (!form.phone) {
             this.errorText = lang.login_text6;
@@ -521,6 +532,7 @@
             this.$refs.captcha.doGetCaptcha();
             return;
           }
+          this.phoneCodeLoading = true;
           this.errorText = "";
           const params = {
             action: "login",
@@ -534,12 +546,14 @@
               if (res.data.status === 200) {
                 // 执行倒计时
                 this.$refs.phoneCodebtn.countDown();
+                this.phoneCodeLoading = false;
               }
             })
             .catch((err) => {
               this.errorText = err.data.msg;
               this.token = "";
               this.captcha = "";
+              this.phoneCodeLoading = false;
             });
         },
         toRegist() {
@@ -598,7 +612,7 @@
         // 获取通用配置
         async getCommonSetting(account) {
           try {
-            const res = await getCommon({account});
+            const res = await getCommon({ account });
             if (
               !account &&
               havePlugin("MpWeixinNotice") &&
@@ -613,7 +627,11 @@
               havePlugin("MpWeixinNotice") &&
               plugin_configuration?.mp_weixin_notice?.scan_login == 1;
             this.commonData = res.data.data;
-            this.seletcLang = getBrowserLanguage();
+            this.seletcLang =
+              res.data.data.lang_home_follow_browser === 1
+                ? getBrowserLanguage()
+                : res.data.data.lang_home;
+            localStorage.setItem("lang", this.seletcLang);
             if (!this.isFirstLoad) {
               // 不支持手机验证码登录
               if (this.commonData.login_phone_verify == 0) {
@@ -653,7 +671,6 @@
               "common_set_before",
               JSON.stringify(res.data.data)
             );
-            localStorage.setItem("lang", this.seletcLang);
             this.isLoadingFinish = true;
             // 关闭loading
             document.getElementById("mainLoading").style.display = "none";

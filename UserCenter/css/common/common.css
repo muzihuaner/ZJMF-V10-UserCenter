@@ -1,8 +1,7 @@
 @import "element-comment.css";
 .menu-alink {
-    color: inherit;
-    text-decoration: none;
-    margin: 10px;
+  color: inherit;
+  text-decoration: none;
 }
 .border-r-none td {
   border-right: none !important;
@@ -23,6 +22,32 @@
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none !important;
+}
+.pro-des-loading {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  background: transparent;
+  z-index: 6;
+  /* 加载中 开始 */
+}
+.pro-des-loading::before {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: calc(100% - 200px);
+  height: 100%;
+  background: #fff;
+}
+.pro-des-loading #mainLoading {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 /* 加载中 开始 */
 #mainLoading {
@@ -136,7 +161,7 @@ input::-webkit-inner-spin-button {
   display: flex;
   flex-direction: row;
   align-items: center;
-  margin-right: 60px;
+  margin-right: 20px;
 }
 .header-right .cloum-line-item {
   margin-left: 20px;
@@ -394,7 +419,7 @@ input::-webkit-inner-spin-button {
   border-right: none;
 }
 .menu-top {
-  margin-top: 20px;
+  margin-top: 86px;
 }
 .aside-menu-text {
   margin-left: 20px;
@@ -534,11 +559,11 @@ input::-webkit-inner-spin-button {
     cursor: pointer;
 }
 .line {
-    width: 123px;
-    height: 0px;
-    border: 1px solid #8c8c8c;
-    opacity: 0.1;
-    margin: 30px auto;
+  width: 123px;
+  height: 0px;
+  border: 1px solid #ffffff;
+  opacity: 0.1;
+  margin: 20px auto;
 }
 .menu-item {
   padding-left: 0.18px;
@@ -2906,11 +2931,14 @@ th {
   border-color: #F2F3F5;
   background: #F2F3F5;
 }
+.security-dialog i {
+  font-size: 0.16rem !important;
+}
 .security-dialog .el-dialog__header {
   display: none;
 }
 .security-dialog .el-dialog__body {
-  padding: 0;
+  padding: 0 !important;
 }
 .security-dialog .security-title {
   box-sizing: border-box;

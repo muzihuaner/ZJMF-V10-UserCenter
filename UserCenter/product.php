@@ -2,7 +2,6 @@
 </head>
 
 <body>
-  <!-- mounted之前显示 -->
   <div id="mainLoading">
     <div class="ddr ddr1"></div>
     <div class="ddr ddr2"></div>
@@ -10,6 +9,7 @@
     <div class="ddr ddr4"></div>
     <div class="ddr ddr5"></div>
   </div>
+
   <div class="product">
     <el-container>
       <aside-menu></aside-menu>

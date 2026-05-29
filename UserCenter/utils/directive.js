@@ -26,7 +26,7 @@ Vue.directive("plugin", {
 });
 // 复制指令  用法 v-copy="复制的内容" 例如 v-copy="123456789" 用于复制内容到剪切板 不用写点击事件
 Vue.directive("copy", {
-  bind(el, {value}) {
+  bind(el, { value }) {
     el.$value = value;
     el.handler = () => {
       el.style.position = "relative";
@@ -74,7 +74,7 @@ Vue.directive("copy", {
     el.addEventListener("click", el.handler); // 绑定点击事件
   },
   // 当传进来的值更新的时候触发
-  componentUpdated(el, {value}) {
+  componentUpdated(el, { value }) {
     el.$value = value;
   },
   // 指令与元素解绑的时候，移除事件绑定
@@ -102,7 +102,7 @@ Vue.directive("time", (el, binding) => {
     month = String(date.getMonth() + 1).padStart(2, "0");
     formattedDate = `${year}-${month}-${day} ${hour}:${minute}`;
   } else {
-    month = new Intl.DateTimeFormat("en-US", {month: "short"}).format(date);
+    month = new Intl.DateTimeFormat("en-US", { month: "short" }).format(date);
     formattedDate = `${day} ${month}, ${year} <span style="color: #878A99;">${hour}:${minute}</span>`;
   }
   el.innerHTML = formattedDate;

@@ -46,12 +46,14 @@ const batchRenewpage = {
           </el-table-column>
         </el-table>
         <div class="total-price">{{lang.template_text87}}：
-          <span class="pay-money">{{currency_prefix }} <span
-              class="font-26">{{ calcDiscountPrice }}</span> </span> 
+          <span class="pay-money">
+            {{currency_prefix }}<span class="font-26">{{ calcDiscountPrice }}</span> 
+          </span>
         </div>
         <div class="origin-price" v-if="hasDiscount && currentDiscount > 0">
-          <span class="pay-money">{{currency_prefix }} <span
-              class="font-26">{{ calcTotalPrice}}</span> </span> 
+          <span class="pay-money">
+            {{currency_prefix }}<span class="font-26">{{ calcTotalPrice}}</span> 
+          </span> 
         </div>
         <!-- 优惠码 -->
         <div class="batch-discount-popover">
@@ -70,10 +72,12 @@ const batchRenewpage = {
             </div>
             <span slot="reference" class="discount-text">{{lang.shoppingCar_tip_text12}}</span>
           </el-popover>
-          <div v-if="promo.promo_code && currentDiscount > 0" class="used">
-            {{ promo.promo_code }}
-            <i class="el-icon-circle-close remove-discountCode" @click="removeDiscountCode"></i>
-          </div>
+          <el-tooltip :content="lang.goods_text8" placement="top" :disabled="!isExclude">
+            <div v-show="promo.promo_code && currentDiscount > 0" class="used">
+              {{ promo.promo_code }}
+              <i class="el-icon-circle-close remove-discountCode" @click="removeDiscountCode"></i>
+            </div>
+          </el-tooltip>
         </div>
       </div>
       <div slot="footer" class="dialog-footer">
@@ -213,6 +217,8 @@ const batchRenewpage = {
       batchHostDiscount: {}, // 批量使用优惠码过后的折扣
       notes: "",
       isShowNote: false,
+      isExclude: false,
+      prevSelectMap: {}
     };
   },
   mixins: [mixin],
@@ -325,7 +331,8 @@ const batchRenewpage = {
     calcTotalPrice() {
       return this.dataList
         .reduce((acc, cur) => {
-          return acc + cur.cur_pirce * 1;
+          //return acc + cur.cur_pirce * 1;
+          return acc + cur.billing_cycles[cur.select_cycles]?.current_base_price * 1;
         }, 0)
         .toFixed(2);
     },
@@ -335,11 +342,12 @@ const batchRenewpage = {
         .reduce((acc, cur) => {
           let temp = 0;
           // 折扣价 + 已减去的循环优惠的价格 - 批量使用优惠码的折扣
-          if (this.batchHostDiscount[cur.id] * 1 > 0) {
-            temp = cur.cur_pirce * 1 + cur.promo_code_discount * 1 - this.batchHostDiscount[cur.id] * 1;
-          } else {
-            temp = cur.cur_pirce * 1;
-          }
+          // if (this.batchHostDiscount[cur.id] * 1 > 0) {
+          //   temp = cur.cur_pirce * 1 + cur.promo_code_discount * 1 - this.batchHostDiscount[cur.id] * 1;
+          // } else {
+          //   temp = cur.cur_pirce * 1;
+          // }
+          temp = cur.billing_cycles[cur.select_cycles]?.price * 1;
           return acc + temp;
         }, 0))
         .toFixed(2);
@@ -362,6 +370,7 @@ const batchRenewpage = {
       this.promo.promo_code = "";
       this.currentDiscount = 0;
       this.batchHostDiscount = {};
+      this.getRenewList();
     },
     async handelApplyPromoCode(bol = true) {
       try {
@@ -371,28 +380,28 @@ const batchRenewpage = {
           }
           return;
         }
-        // this.isLoading = true;
-        let discountArr = [];
-        this.dataList.forEach(item => {
-          const params = {
-            host_id: item.id,
-            product_id: item.product_id,
-            amount: item.billing_cycles[item.select_cycles].base_price,
-            billing_cycle_time: item.billing_cycles[item.select_cycles].duration,
-            promo_code: this.discountInputVal,
-            scene: "renew"
-          };
-          discountArr.push(params);
-        });
-        const res = await applyBatchRenewCode({ promo_codes: discountArr });
-        this.promo.promo_code = this.discountInputVal;
-        this.currentDiscount = res.data.data.discount;
-        this.batchHostDiscount = res.data.data.host_discount;
-        if (this.currentDiscount * 1 > 0) {
-          this.$message.success(res.data.msg);
-        } else {
-          this.removeDiscountCode();
-        }
+        this.getRenewList(this.discountInputVal, true);
+        // let discountArr = [];
+        // this.dataList.forEach(item => {
+        //   const params = {
+        //     host_id: item.id,
+        //     product_id: item.product_id,
+        //     amount: item.billing_cycles[item.select_cycles].base_price,
+        //     billing_cycle_time: item.billing_cycles[item.select_cycles].duration,
+        //     promo_code: this.discountInputVal,
+        //     scene: "renew"
+        //   };
+        //   discountArr.push(params);
+        // });
+        // const res = await applyBatchRenewCode({ promo_codes: discountArr });
+        // this.promo.promo_code = this.discountInputVal;
+        // this.currentDiscount = res.data.data.discount;
+        // this.batchHostDiscount = res.data.data.host_discount;
+        // if (this.currentDiscount * 1 > 0) {
+        //   this.$message.success(res.data.msg);
+        // } else {
+        //   this.removeDiscountCode();
+        // }
       } catch (error) {
         this.$message.error(error.data.msg);
       }
@@ -573,14 +582,20 @@ const batchRenewpage = {
       this.currentDiscount = 0;
       this.batchHostDiscount = {};
       this.isShow = true;
+      this.isExclude = false;
+      this.prevSelectMap = {};
+      this.dataList = [];
       this.getRenewList();
     },
     changeCycles(item) {
-      this.discountInputVal = this.promo.promo_code;
-      this.handelApplyPromoCode(false);
-      item.cur_pirce = this.calcPrice(item);
-      item.promo_code_discount = this.calcPrice(item, true);
+      const cycle = item.billing_cycles[item.select_cycles || 0];
+      item.cur_pirce = cycle.price || 0;
+      // this.discountInputVal = this.promo.promo_code;
+      // this.handelApplyPromoCode(false);
+      // item.cur_pirce = this.calcPrice(item);
+      // item.promo_code_discount = this.calcPrice(item, true);
     },
+
     calcPrice(row, bol = false) {
       let temp = 'price';
       if (bol) {
@@ -592,16 +607,40 @@ const batchRenewpage = {
         )[0]?.[temp] || 0
       );
     },
-    getRenewList() {
+    getRenewList(code = '', bol = false) {
       this.loading = true;
-      batchRenewList({ ids: this.idsArr })
+      (this.dataList || []).forEach((it) => {
+        if (typeof it.select_cycles !== 'undefined') {
+          this.prevSelectMap[it.id] = it.select_cycles;
+        }
+      });
+      batchRenewList({ 
+        ids: this.idsArr,
+        'customfield[promo_code]': code
+      })
         .then((res) => {
           this.dataList = res.data.data.list.map((item) => {
-            item.select_cycles = 0;
-            item.cur_pirce = item.billing_cycles[0].price;
-            item.promo_code_discount = item.billing_cycles[0].promo_code_discount || 0;
+            const sel = typeof this.prevSelectMap[item.id] !== 'undefined' ? this.prevSelectMap[item.id] : (item.select_cycles || 0);
+            item.select_cycles = sel;
+            item.select_cycles = item.select_cycles || 0;
+            const cycle = item.billing_cycles && item.billing_cycles[item.select_cycles] ? item.billing_cycles[item.select_cycles] : (item.billing_cycles && item.billing_cycles[0] ? item.billing_cycles[0] : { price: 0, current_base_price: 0, promo_code_discount: 0 });
+            item.cur_pirce = cycle.price;
+            item.current_base_price = cycle.current_base_price;
+            item.promo_code_discount = cycle.promo_code_discount || 0;
             return item;
           });
+          if (code && this.dataList[0]?.billing_cycles[0]?.manual_promo_code_success === 1) {
+            this.promo.promo_code = code;
+            this.currentDiscount = 1;
+          }
+          const temp = res.data.data.list[0];
+          // 是否互斥
+          this.isExclude = temp?.billing_cycles[0]?.promo_code_exclude_client_level;
+          if (this.isExclude && bol) {
+            this.$alert(lang.goods_text8, lang.topMenu_text5, {
+              callback: action => {}
+            });
+          }
           this.loading = false;
         })
         .catch((err) => {

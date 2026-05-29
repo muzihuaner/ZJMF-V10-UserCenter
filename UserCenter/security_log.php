@@ -4,7 +4,6 @@
 </head>
 
 <body>
-  <!-- mounted之前显示 -->
   <div id="mainLoading">
     <div class="ddr ddr1"></div>
     <div class="ddr ddr2"></div>
@@ -12,6 +11,7 @@
     <div class="ddr ddr4"></div>
     <div class="ddr ddr5"></div>
   </div>
+
   <div class="template">
     <el-container>
       <aside-menu @getruleslist="getRule"></aside-menu>
@@ -37,7 +37,8 @@
                     </div>
                     <div class="searchbar com-search">
                       <el-input v-model="params.keywords" style="width: 3.2rem;margin-left: .2rem;"
-                        :placeholder="lang.cloud_tip_2" @keypress.enter.native="inputChange" clearable @clear="getLogList">
+                        :placeholder="lang.cloud_tip_2" @keypress.enter.native="inputChange" clearable
+                        @clear="getLogList">
                         <i class="el-icon-search input-search" slot="suffix" @Click="inputChange"></i>
                       </el-input>
                     </div>
@@ -58,12 +59,14 @@
                       </el-table-column>
                     </el-table>
                     <div class="custom-pagination">
-                      <pagination :page-data="params" @sizechange="sizeChange"
-                        @currentchange="currentChange" layout="sizes, jumper">
+                      <pagination :page-data="params" @sizechange="sizeChange" @currentchange="currentChange"
+                        layout="sizes, jumper">
                       </pagination>
                       <div class="manual-btn">
-                        <el-button type="primary" size="small" :disabled="params.page <= 1" @click="handleChange(0)">上一页</el-button>
-                        <el-button type="primary" size="small" :disabled="isNextPageDisabled" @click="handleChange(1)">下一页</el-button>
+                        <el-button type="primary" size="small" :disabled="params.page <= 1"
+                          @click="handleChange(0)">上一页</el-button>
+                        <el-button type="primary" size="small" :disabled="isNextPageDisabled"
+                          @click="handleChange(1)">下一页</el-button>
                       </div>
                     </div>
                   </div>

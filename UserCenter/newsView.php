@@ -11,6 +11,7 @@
     <div class="ddr ddr4"></div>
     <div class="ddr ddr5"></div>
   </div>
+
   <div id="content" class="template news news_detail" style="font-size: 0.14rem;">
     <!-- pc端 -->
     <div class="new-box">

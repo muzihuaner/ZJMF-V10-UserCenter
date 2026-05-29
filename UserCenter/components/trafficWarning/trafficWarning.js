@@ -37,7 +37,7 @@ const trafficWarning = {
       submitLoading: false,
       rules: {
         leave_percent: [
-          {required: true, message: lang.placeholder_pre2, trigger: "change"},
+          { required: true, message: lang.placeholder_pre2, trigger: "change" },
         ],
       },
       warningForm: {

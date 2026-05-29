@@ -1,9 +1,8 @@
 const securityVerification = {
   template: `
-    <div>
-  
+<div>
   <el-dialog width="6rem" :visible.sync="securityVisible" @close="closeSecurityDialog" custom-class="security-dialog"
-    :show-close="false">
+    :show-close="false" :append-to-body="appendToBody">
     <div class="security-title">
       <span class="title-text">安全验证</span>
       <span class="close-btn" @click="closeSecurityDialog">
@@ -13,47 +12,57 @@ const securityVerification = {
     <div class="security-content">
       <el-form label-width="80px" ref="securityForm" :model="securityForm" label-position="top" :rules="currentRules">
         <el-form-item :label="lang.security_verify_text2" prop="method_id">
-          <el-select  v-model="securityForm.method_id" style="width: 100%;" @change="methodChange" :placeholder="lang.security_verify_text7">
+          <el-select v-model="securityForm.method_id" style="width: 100%;" @change="methodChange"
+            :placeholder="lang.security_verify_text7">
             <el-option v-for="item in availableMethods" :key="item.value" :value="item.value" :label="item.label">
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item :label="calcCurrentMethod?.label" v-if="securityForm.method_id === 'phone_code'" prop="phone_code">
-        <div style="display: flex; align-items: center;gap: 10px;">
-              <el-input  v-model="securityForm.phone_code" :placeholder="calcCurrentMethod?.tip">
-          </el-input>
-          <count-down-button ref="securityPhoneCodeBtnRef" :loading="phoneCodeLoading" @click.native="sendPhoneCode" my-class="code-btn" >
-            </count-down-button>
-        </div>
-        </el-form-item>
-        <el-form-item :label="calcCurrentMethod?.label" v-if="securityForm.method_id === 'email_code'" prop="email_code">
-        <div style="display: flex; align-items: center;gap: 10px;">
-          <el-input  v-model="securityForm.email_code" :placeholder="calcCurrentMethod?.tip">
+        <el-form-item :label="calcCurrentMethod?.label" v-if="securityForm.method_id === 'phone_code'"
+          prop="phone_code">
+          <div style="display: flex; align-items: center;gap: 10px;">
+            <el-input v-model="securityForm.phone_code" :placeholder="calcCurrentMethod?.tip">
             </el-input>
-            <count-down-button ref="securityEmailCodeBtnRef" :loading="emailCodeLoading" @click.native="sendEmailCode" my-class="code-btn" >
-              </count-down-button>
+            <count-down-button ref="securityPhoneCodeBtnRef" :loading="phoneCodeLoading" @click.native="sendPhoneCode"
+              my-class="code-btn">
+            </count-down-button>
           </div>
         </el-form-item>
-        <el-form-item :label="calcCurrentMethod?.label" v-if="securityForm.method_id === 'operate_password'" prop="operate_password">
-          <el-input  v-model="securityForm.operate_password" :placeholder="calcCurrentMethod?.placeholder"></el-input>
+        <el-form-item :label="calcCurrentMethod?.label" v-if="securityForm.method_id === 'email_code'"
+          prop="email_code">
+          <div style="display: flex; align-items: center;gap: 10px;">
+            <el-input v-model="securityForm.email_code" :placeholder="calcCurrentMethod?.tip">
+            </el-input>
+            <count-down-button ref="securityEmailCodeBtnRef" :loading="emailCodeLoading" @click.native="sendEmailCode"
+              my-class="code-btn">
+            </count-down-button>
+          </div>
         </el-form-item>
-        <el-form-item :label="calcCurrentMethod?.label" v-if="securityForm.method_id === 'certification'"  prop="certification">
+        <el-form-item :label="calcCurrentMethod?.label" v-if="securityForm.method_id === 'operate_password'"
+          prop="operate_password">
+          <el-input show-password v-model="securityForm.operate_password"
+            :placeholder="calcCurrentMethod?.placeholder"></el-input>
+        </el-form-item>
+        <el-form-item :label="calcCurrentMethod?.label" v-if="securityForm.method_id === 'certification'"
+          prop="certification">
           <div class="realname-verify-box">
-            <div ref="realnameVerifyRef" id="realnameVerify" style="display: flex; align-items: center; justify-content: center;"></div>
+            <div ref="realnameVerifyRef" id="realnameVerify"
+              style="display: flex; align-items: center; justify-content: center;"></div>
             <p style="text-align: center;margin-top: 10px;">{{calcCurrentMethod?.tip}}</p>
           </div>
         </el-form-item>
       </el-form>
     </div>
     <div class="security-footer">
-      <el-button type="primary" @click="confirmSecurity" :loading="confirmSecurityLoading">{{lang.finance_btn8}}</el-button>
+      <el-button type="primary" @click="confirmSecurity" :loading="confirmSecurityLoading">
+        {{lang.finance_btn8}}
+      </el-button>
       <el-button type="info" class="cancel-btn" @click="closeSecurityDialog">{{lang.finance_btn7}}</el-button>
     </div>
   </el-dialog>
-
-      <captcha-dialog :is-show-captcha="isShowCaptcha" ref="securityCaptchaRef" captcha-id="security-captcha"
-        @get-captcha-data="getData" @captcha-cancel="captchaCancel">
-      </captcha-dialog>
+  <captcha-dialog :is-show-captcha="isShowCaptcha" ref="securityCaptchaRef" captcha-id="security-captcha"
+    @get-captcha-data="getData" @captcha-cancel="captchaCancel">
+  </captcha-dialog>
 </div>
 
     `,
@@ -65,6 +74,10 @@ const securityVerification = {
     actionType: {
       type: String,
       default: "exception_login",
+    },
+    appendToBody: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {
@@ -95,28 +108,28 @@ const securityVerification = {
   },
   computed: {
     currentRules() {
-      const {method_id} = this.securityForm;
+      const { method_id } = this.securityForm;
       const base = {
-        method_id: [{required: true, message: lang.security_verify_text7}],
+        method_id: [{ required: true, message: lang.security_verify_text7 }],
       };
       if (method_id === "phone_code") {
         base.phone_code = [
-          {required: true, message: lang.security_verify_text8},
+          { required: true, message: lang.security_verify_text8 },
         ];
       }
       if (method_id === "email_code") {
         base.email_code = [
-          {required: true, message: lang.security_verify_text9},
+          { required: true, message: lang.security_verify_text9 },
         ];
       }
       if (method_id === "operate_password") {
         base.operate_password = [
-          {required: true, message: lang.security_verify_text10},
+          { required: true, message: lang.security_verify_text10 },
         ];
       }
       if (method_id === "certification") {
         base.certification = [
-          {required: true, message: lang.security_verify_text11},
+          { required: true, message: lang.security_verify_text11 },
         ];
       }
       return base;
@@ -301,7 +314,6 @@ const securityVerification = {
         document.body.appendChild(script);
       });
     },
-
     // 生成二维码
     generateQRCode(url) {
       if (!url) return;
@@ -389,7 +401,6 @@ const securityVerification = {
         this.pollingTimeout = null;
       }
     },
-
     // 获取通用配置
     getCommonData() {
       this.commonData = JSON.parse(

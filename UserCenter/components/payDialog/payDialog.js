@@ -1030,7 +1030,7 @@ const payDialog = {
       clearInterval(this.timer);
       clearInterval(this.countdownTimer);
       this.time = 300000;
-      if (this.zfData.checked) {
+      if (this.zfData.checked && !this.isPaySuccess) {
         // 如果勾选了使用余额
         this.zfData.checked = false;
         // 取消使用余额
@@ -1115,7 +1115,7 @@ const payDialog = {
         if (!this.isCz) {
           await creditPay({
             id: this.zfData.orderId,
-            use: Number(this.zfData.checked),
+            use: Number(this.zfData.checked && balance > 0),
           });
         }
         this.priceLoading = true;
@@ -1361,6 +1361,8 @@ const payDialog = {
           return this.$refs.proof.getOrderDetails(this.zfData.orderId);
         }
         await this.getGateway();
+        // 处理支付方式选择
+        await this.handleGatewaySelection();
         const canUseCoinOrderType = [
           "renew",
           "upgrade",
@@ -1380,19 +1382,25 @@ const payDialog = {
             this.showCoupon = false;
           }
         }
-
-        this.showCoin =
-          havePlugin("Coin") && canUseCoinOrderType.includes(orderData.type);
-        if (this.showCoin) {
+        const canUseCoin = havePlugin("Coin") && canUseCoinOrderType.includes(orderData.type);
+        if (canUseCoin) {
           await this.getCoinInfo();
-          if (this.coinClientInfo?.available_coin) {
+          // 优先判断订单是否用了平台币
+          if (this.coinClientInfo?.use_coin === 1) {
+            this.showCoin = true;
+            this.auto = true;
+            this.useCoin = true;
+            await this.applyCoin(true);
+            // 判断后台是否开启余额限制
+          } else if (this.coinClientInfo?.credit_enough_no_use == 1 && Number(this.balance) >= Number(orderData.amount)) {
+            this.showCoin = false;
+          } else if (this.coinClientInfo?.available_coin) {
+            this.showCoin = true;
             this.auto = true;
             this.useCoin = true;
             await this.applyCoin(true);
           }
         }
-        // 处理支付方式选择
-        await this.handleGatewaySelection();
         // 切换支付方式
         this.zfSelectChange();
       } catch (error) {

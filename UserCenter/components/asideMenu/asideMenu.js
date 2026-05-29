@@ -1,7 +1,7 @@
 // css 样式依赖common.css
 const asideMenu = {
   template: `
-<el-aside width="240px">
+<el-aside width="190px">
       <a :href="commonData.clientarea_logo_url || '/home.htm'" onclick="return false" class="menu-alink">
         <img class="ali-logo" :src="logo" @click="goHome" v-show="logo"></img>
       </a>
@@ -97,7 +97,7 @@ const asideMenu = {
   created() {
     this.getCommonSetting();
   },
-  beforeUpdate() {},
+  beforeUpdate() { },
   mixins: [mixin],
   updated() {
     // // 关闭loading
@@ -129,7 +129,7 @@ const asideMenu = {
           JSON.stringify(res.data.data)
         );
         this.logo = this.commonData.system_logo;
-      } catch (error) {}
+      } catch (error) { }
     },
     // 判断当前菜单激活
     setActiveMenu() {

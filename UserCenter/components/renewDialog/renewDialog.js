@@ -1,106 +1,115 @@
+/* 详情页续费弹窗（包含cloud按需转包年包月） */
 const renewDialog = {
-  template: /*html*/ `
-    <div>
-    <el-dialog width="6.9rem" :visible.sync="isShowRenew" :show-close="false" @close="renewDgClose" class="common-renew-dialog">
-    <div class="dialog-title">{{demand ? '转包年包月' : '续费'}}</div>
-    <div class="dialog-main">
-      <div class="renew-content">
-        <div class="renew-item" :class="selected_id==item.id?'renew-active':''" v-for="item in renewList"
-          :key="item.id" @click="renewItemChange(item)">
-          <div class="item-top">{{item.customfield?.multi_language?.billing_cycle || item.billing_cycle}}</div>
-          <div class="item-bottom" v-if="hasShowPromo && useDiscount">
-            {{commonData.currency_prefix + item.base_price}}
-          </div>
-          <div class="item-bottom" v-else>{{commonData.currency_prefix + item.price}}</div>
-          <div class="item-origin-price"
-            v-if="item.price*1 < item.base_price*1 && !useDiscount">
-            {{commonData.currency_prefix + item.base_price}}
-          </div>
-          <i class="el-icon-check check" v-show="selected_id==item.id"></i>
-        </div>
-      </div>
-      <div class="pay-content">
-        <div class="pay-price">
-          <div class="money" v-loading="renewLoading">
-            <span class="text">{{lang.common_cloud_label11}}:</span>
-            <span>{{commonData.currency_prefix}}{{totalPrice | filterMoney}}</span>
-            <el-popover placement="top-start" width="200" trigger="hover" v-if="level_discount_amount * 1 || code_discount_amount * 1">
-              <div class="show-config-list">
-                <p v-if="level_discount_amount*1 > 0">
-                  {{lang.shoppingCar_tip_text2}}：{{commonData.currency_prefix}}
-                  {{ level_discount_amount | filterMoney}}
-                </p>
-                <p v-if="code_discount_amount * 1 > 0">
-                  {{lang.shoppingCar_tip_text4}}：{{commonData.currency_prefix}}
-                  {{ code_discount_amount | filterMoney }}
-                </p>
+  template: /*html*/
+    `
+    <div class="common-renew-dialog">
+    <el-dialog width="6.9rem" :visible.sync="isShowRenew" :show-close="false" @close="renewDgClose">
+      <div class="dialog-title">{{renewTitle}}</div>
+      <div class="dialog-main">
+        <template v-if="renew_forbidden === 0">
+          <div class="renew-content">
+            <div class="renew-item" :class="renewActiveId==(byIndex ? index : item.id)?'renew-active':''"
+              v-for="(item, index) in renewPageData" :key="item.id || index" @click="renewItemChange(item,index)">
+              <div class="item-top">{{item.customfield?.multi_language?.billing_cycle || item.billing_cycle}}</div>
+              <div class="item-bottom" v-if="hasShowPromo && renewParams.isUseDiscountCode">
+                {{commonData.currency_prefix + item.base_price}}
               </div>
-              <i class="el-icon-warning-outline total-icon" slot="reference"></i>
-            </el-popover>
-            <p class="original-price"
-              v-if="customfield.promo_code && totalPrice != base_price">
-              {{commonData.currency_prefix}} {{ base_price | filterMoney}}
-            </p>
-            <p class="original-price"
-              v-if="!customfield.promo_code && totalPrice != original_price">
-              {{commonData.currency_prefix}} {{ original_price | filterMoney}}
-            </p>
-            <div class="code-box">
-              <!-- 优惠码 -->
-              <discount-code v-show="hasShowPromo && !customfield.promo_code"
-                @get-discount="getRenewDiscount(arguments)"
-                :scene="demand ? 'change_billing_cycle' : 'renew'" :product_id="product_id"
-                :amount="base_price" :billing_cycle_time="duration"></discount-code>
+              <div class="item-bottom" v-else>{{commonData.currency_prefix + item.price}}</div>
+              <div class="item-origin-price" v-if="item.price*1 < item.base_price*1 && !renewParams.isUseDiscountCode">
+                {{commonData.currency_prefix + item.base_price}}
+              </div>
+              <i class="el-icon-check check" v-show="renewActiveId==(byIndex ? index : item.id)"></i>
             </div>
-            <div class="code-number-text">
-              <div class="discount-codeNumber" v-show="customfield.promo_code">
-                {{ customfield.promo_code }}<i class="el-icon-circle-close remove-discountCode"
-                  @click="removeRenewDiscountCode"></i>
+          </div>
+          <div class="pay-content">
+            <div class="pay-price">
+              <div class="money" v-loading="renewLoading">
+                <span class="text">{{lang.common_cloud_label11}}:</span>
+                <span>{{commonData.currency_prefix}}{{renewParams.totalPrice | filterMoney}}</span>
+                <el-popover placement="top-start" width="200" trigger="hover" v-if="(isShowLevel && renewParams.clDiscount*1 > 0) 
+              || (hasShowPromo && renewParams.isUseDiscountCode)">
+                  <div class="show-config-list">
+                    <p v-if="isShowLevel && renewParams.clDiscount*1 > 0">
+                      {{lang.shoppingCar_tip_text2}}：{{commonData.currency_prefix}}
+                      {{ renewParams.clDiscount | filterMoney}}
+                    </p>
+                    <p v-if="hasShowPromo && renewParams.isUseDiscountCode">
+                      {{lang.shoppingCar_tip_text4}}：{{commonData.currency_prefix}}
+                      {{ renewParams.code_discount | filterMoney }}
+                    </p>
+                  </div>
+                  <i class="el-icon-warning-outline total-icon" slot="reference"></i>
+                </el-popover>
+                <p class="original-price"
+                  v-if="renewParams.customfield.promo_code && renewParams.totalPrice != renewParams.base_price">
+                  {{commonData.currency_prefix}} {{ renewParams.base_price | filterMoney}}
+                </p>
+                <p class="original-price"
+                  v-if="!renewParams.customfield.promo_code && renewParams.totalPrice != renewParams.original_price">
+                  {{commonData.currency_prefix}} {{ renewParams.original_price | filterMoney}}
+                </p>
+                <div class="code-box">
+                  <!-- 优惠码 -->
+                  <discount-code v-show="hasShowPromo" ref="discountCode" @get-discount="getRenewDiscount(arguments)"
+                    @remove-discount="removeRenewDiscountCode" :scene="isDemandFee ? 'change_billing_cycle' : 'renew'"
+                    :product_id="productId" :amount="renewParams.base_price" :billing_cycle_time="renewParams.duration">
+                  </discount-code>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </template>
+        <template v-if="renew_forbidden === 1">
+          <el-alert :title="lang.forbid_renew_tip" type="warning" :closable="false" :description="lang.forbid_renew_tip_desc" show-icon>
+          </el-alert>
+        </template>
       </div>
-    </div>
-    <div class="dialog-footer">
-      <el-button :loading="submitLoading" type="primary" class="btn-ok" @click="subRenew">
-        {{demand ? lang.mf_demand_tip9 : lang.common_cloud_btn30}}
-      </el-button>
-      <div class="btn-no" @click="renewDgClose">{{lang.common_cloud_btn29}}</div>
-    </div>
-  </el-dialog>
+      <div class="dialog-footer">
+        <el-button :loading="submitLoading" type="primary" class="btn-ok" @click="subRenew">
+          {{isDemandFee ? lang.mf_demand_tip9 : lang.auto_renew_sure}}
+        </el-button>
+        <div class="btn-no" @click="renewDgClose">{{lang.pay_text12}}</div>
+      </div>
+    </el-dialog>
   </div>
-      `,
+  `,
 
   data() {
     return {
       isShowRenew: false,
-      currency_prefix: "",
-      currency_suffix: "",
+      lang: window.lang || {},
       commonData: {},
       submitLoading: false,
-      renewList: [],
+      renewPageData: [],
+      renewActiveId: 0,
+      renewParams: {
+        billing_cycle: "",
+        duration: 0,
+        original_price: 0,
+        base_price: 0,
+        clDiscount: 0,
+        code_discount: 0,
+        isUseDiscountCode: false,
+        customfield: {
+          promo_code: "",
+          voucher_get_id: "",
+        },
+        totalPrice: 0
+      },
+      renewLoading: false,
+      renewTitle: "",
       hasClientLevel: false,
       hasShowPromo: false,
-      hasShowCash: false,
-      useDiscount: false,
-      level_discount_amount: 0, // 用户等级优惠金额
-      code_discount_amount: 0, // 优惠码优惠金额
-      duration: 0, // 续费周期
-      customfield: {
-        promo_code: "",
-        voucher_get_id: "",
-      },
-      billing_cycle: "",
-      selected_id: 0,
-      original_price: 0,
-      base_price: 0,
-      renewLoading: false,
+      isShowLevel: false,
+      isExclude: 0, // 优惠码和用户等级是否互斥
+      renew_forbidden: ''
     };
   },
-
+  components: {
+    discountCode
+  },
   props: {
-    demand: {
+    isDemandFee: {
       type: Boolean,
       default: false,
     },
@@ -109,23 +118,16 @@ const renewDialog = {
       default: 0,
       required: true,
     },
-    product_id: {
+    productId: {
       type: Number,
       default: 0,
       required: true,
     },
-    renew_amount: {
-      type: Number,
-      default: 0,
-    },
-    billing_cycle_time: {
-      type: Number,
-      default: 0,
-    },
-    billing_cycle_name: {
-      type: String,
-      default: "",
-    },
+    // 特殊处理代理老财务 周期没有id的问题
+    byIndex: {
+      type: Boolean,
+      default: false,
+    }
   },
 
   created() {
@@ -142,49 +144,79 @@ const renewDialog = {
     }
     this.hasClientLevel = havePlugin("IdcsmartClientLevel");
     this.hasShowPromo = havePlugin("PromoCode");
-    this.hasShowCash = havePlugin("IdcsmartVoucher");
+    this.isShowLevel = this.hasClientLevel;
     this.getCommon();
   },
+
   computed: {
+    // 计算总价
     totalPrice() {
-      const goodsPrice =
-        this.hasShowPromo && this.customfield.promo_code
-          ? this.base_price
-          : this.original_price;
-      const discountPrice =
-        this.level_discount_amount + this.code_discount_amount;
+      const goodsPrice = this.hasShowPromo && this.renewParams.customfield.promo_code
+        ? this.renewParams.base_price
+        : this.renewParams.original_price;
+      const discountPrice = (this.renewParams.clDiscount * 1) + this.renewParams.code_discount;
       const totalPrice = goodsPrice - discountPrice;
       const nowPrice = totalPrice > 0 ? totalPrice.toFixed(2) : 0;
-      const showPirce = Number(nowPrice);
-      return showPirce > 0 ? showPirce.toFixed(2) : 0;
-    },
+      return Number(nowPrice).toFixed(2);
+    }
+  },
+
+  filters: {
+    filterMoney(val) {
+      return Number(val).toFixed(2);
+    }
+  },
+
+  watch: {
+    totalPrice(newVal) {
+      this.renewParams.totalPrice = newVal;
+    }
   },
 
   methods: {
     // 显示续费弹窗
-    showRenew() {
+    showRenew(isDemand = false) {
       if (this.isShowRenew) return;
-      // 获取续费页面信息
-      const params = {
-        id: this.id,
+
+      // 重置所有状态
+      this.isExclude = 0;
+      this.renewParams = {
+        billing_cycle: "",
+        duration: 0,
+        original_price: 0,
+        base_price: 0,
+        clDiscount: 0,
+        code_discount: 0,
+        isUseDiscountCode: false,
+        customfield: {
+          promo_code: "",
+          voucher_get_id: "",
+        },
+        totalPrice: 0
       };
+      this.$refs.discountCode && this.$refs.discountCode.reset();
+      const params = { id: this.id };
       this.renewLoading = true;
       this.submitLoading = true;
+      this.renewTitle = isDemand ? lang.mf_demand_tip5 : lang.common_cloud_title10;
       this.isShowRenew = true;
-      const getRenewApi = this.demand
-        ? apiGetDemandToPrepaymentPrice
-        : renewPage;
-      getRenewApi(params)
+      const apiFun = isDemand ? apiGetDemandToPrepaymentPrice : renewPage;
+      apiFun(params)
         .then(async (res) => {
+          this.renew_forbidden = res.data.renew_forbidden;
           this.submitLoading = false;
           this.renewLoading = false;
           if (res.data.status === 200) {
-            this.renewList = res.data.data.host || res.data.data.duration || [];
-            this.selected_id = this.renewList[0].id;
-            this.billing_cycle = this.renewList[0].billing_cycle;
-            this.duration = this.renewList[0].duration;
-            this.original_price = this.renewList[0].price;
-            this.base_price = this.renewList[0].base_price;
+            this.renewPageData = res.data.data.host || res.data.data.duration || [];
+            if (this.renewPageData.length > 0) {
+              const firstItem = this.renewPageData[0];
+              this.renewActiveId = this.byIndex ? 0 : firstItem.id;
+              this.renewParams.billing_cycle = firstItem.billing_cycle;
+              this.renewParams.duration = firstItem.duration;
+              this.renewParams.original_price = firstItem.price;
+              this.renewParams.base_price = firstItem.base_price;
+              this.renewParams.clDiscount = 0;
+            }
           }
         })
         .catch((err) => {
@@ -195,118 +227,168 @@ const renewDialog = {
         });
     },
 
+    /* 
+       * 1.正常续费弹窗：
+       *  * 不互斥的优惠码的时候之前算出来的接口里面的用户等级都是0会有问题
+       *  * 需要重新自己计算用户等级折扣
+       * 2.转包年包月
+       *  * 续费页面里面的等级折扣可以直接使用
+    */
     // 续费使用优惠码
     async getRenewDiscount(data) {
-      this.customfield.promo_code = data[1];
-      this.useDiscount = true;
-      this.code_discount_amount = Number(data[0]);
-      this.level_discount_amount = await this.getClientLevelAmount(
-        this.base_price
-      );
+      this.renewParams.code_discount = Number(data[0]);
+      this.renewParams.customfield.promo_code = data[1];
+      this.isExclude = Number(data[2]) || 0;
+      this.renewParams.isUseDiscountCode = true;
+
+      // 获取当前选中项的等级折扣
+      let currentItem = {};
+      if (this.byIndex) {
+        currentItem = this.renewPageData[this.renewActiveId]
+      } else {
+        currentItem = this.renewPageData.find(item => item.id === this.renewActiveId);
+      }
+
+      if (currentItem) {
+        // 如果优惠码与等级折扣互斥，则清空等级折扣
+        if (this.isExclude === 1) {
+          this.renewParams.clDiscount = 0;
+        } else {
+          // 仅针对于普通续费 并且 不互斥的情况
+          if (this.isShowLevel && !this.isDemandFee) {
+            const discountParams = { id: this.productId, amount: currentItem.current_base_price };
+            await clientLevelAmount(discountParams)
+              .then((res2) => {
+                if (res2.data.status === 200) {
+                  this.renewParams.clDiscount = Number(res2.data.data.discount); // 客户等级优惠金额
+                }
+              })
+              .catch((error) => {
+                this.renewParams.clDiscount = 0;
+              });
+          } else {
+            this.renewParams.clDiscount = currentItem.client_level_discount || 0;
+          }
+        }
+      }
     },
 
     // 移除续费的优惠码
     removeRenewDiscountCode() {
-      this.useDiscount = false;
-      this.customfield.promo_code = "";
-      this.code_discount_amount = 0;
-      this.level_discount_amount = 0;
+      this.isExclude = 0;
+      this.renewParams.isUseDiscountCode = false;
+      this.renewParams.customfield.promo_code = "";
+      this.renewParams.code_discount = 0;
+      this.renewParams.clDiscount = 0;
     },
 
     // 续费弹窗关闭
     renewDgClose() {
       this.isShowRenew = false;
-      this.selected_id = 0;
-      this.duration = 0;
-      this.billing_cycle = "";
-      this.original_price = 0;
-      this.base_price = 0;
-      this.renewList = [];
-      this.customfield = {
-        promo_code: "",
-        voucher_get_id: "",
+      this.renewPageData = [];
+      this.renewActiveId = 0;
+      this.isExclude = 0;
+      this.renewParams = {
+        billing_cycle: "",
+        duration: 0,
+        original_price: 0,
+        base_price: 0,
+        clDiscount: 0,
+        code_discount: 0,
+        isUseDiscountCode: false,
+        customfield: {
+          promo_code: "",
+          voucher_get_id: "",
+        },
+        totalPrice: 0
       };
-      this.code_discount_amount = 0;
-      this.level_discount_amount = 0;
-      this.removeRenewDiscountCode();
-    },
-
-    async getClientLevelAmount(amount) {
-      try {
-        if (!this.hasClientLevel) {
-          return 0;
-        }
-        const params = {id: this.product_id, amount: amount};
-        const res = await apiClientLevelAmount(params);
-        return Number(res.data.data.discount);
-      } catch (error) {
-        this.$message.error(error.data.msg);
-        return 0;
-      }
-    },
-
-    async getPromoDiscount(amount) {
-      try {
-        if (!this.hasShowPromo || !this.useDiscount) {
-          return 0;
-        }
-        const params = {
-          scene: this.demand ? "change_billing_cycle" : "renew",
-          product_id: this.product_id,
-          amount: amount,
-          billing_cycle_time: this.duration,
-          promo_code: this.customfield.promo_code,
-        };
-
-        // 更新优惠码
-        const res = await applyPromoCode(params);
-        return Number(res.data.data.discount);
-      } catch (error) {
-        this.useDiscount = false;
-        this.customfield.promo_code = "";
-        this.level_discount_amount = 0;
-        this.$message.error(error.data.msg);
-        return 0;
-      }
+      this.renewLoading = false;
     },
 
     // 续费周期点击
-    async renewItemChange(item) {
-      this.submitLoading = true;
-      this.selected_id = item.id;
-      this.duration = item.duration;
-      this.billing_cycle = item.billing_cycle;
-      this.original_price = item.price;
-      this.base_price = item.base_price;
-      // 开启了优惠码插件
-      this.level_discount_amount = await this.getClientLevelAmount(
-        item.base_price
-      );
-      this.code_discount_amount = await this.getPromoDiscount(item.base_price);
-      this.submitLoading = false;
+    async renewItemChange(item, index) {
+      this.renewLoading = true;
+      this.renewActiveId = this.byIndex ? index : item.id;
+      this.renewParams.duration = item.duration;
+      this.renewParams.billing_cycle = item.billing_cycle;
+      this.renewParams.original_price = item.price;
+      this.renewParams.base_price = item.base_price;
+
+      // 开启了优惠码插件且已使用优惠码
+      if (this.hasShowPromo && this.renewParams.isUseDiscountCode) {
+        this.renewParams.clDiscount = Number(item.client_level_discount);
+        // 更新优惠码
+        await applyPromoCode({
+          scene: this.isDemandFee ? "change_billing_cycle" : "renew",
+          product_id: this.productId,
+          amount: item.base_price,
+          billing_cycle_time: this.renewParams.duration,
+          promo_code: this.renewParams.customfield.promo_code,
+        })
+          .then((res) => {
+            this.renewParams.isUseDiscountCode = true;
+            this.renewParams.code_discount = Number(res.data.data.discount);
+            this.isExclude = Number(res.data.data?.exclude_with_client_level) || 0;
+
+            // 如果优惠码与等级折扣互斥，则清空等级折扣
+            if (this.isExclude === 1) {
+              this.renewParams.clDiscount = 0;
+            } else {
+              // 仅针对于普通续费 并且 不互斥的情况
+              if (this.isShowLevel && !this.isDemandFee) {
+                const discountParams = { id: this.productId, amount: item.current_base_price };
+                clientLevelAmount(discountParams)
+                  .then((res2) => {
+                    if (res2.data.status === 200) {
+                      this.renewParams.clDiscount = Number(res2.data.data.discount); // 客户等级优惠金额
+                    }
+                  })
+                  .catch((error) => {
+                    this.renewParams.clDiscount = 0;
+                  });
+              } else {
+                this.renewParams.clDiscount = Number(item.client_level_discount || 0);
+              }
+            }
+          })
+          .catch((err) => {
+            this.$message.error(err.data.msg);
+            this.removeRenewDiscountCode();
+          });
+      }
+      this.renewLoading = false;
     },
 
     // 续费提交
     subRenew() {
+      if (this.renew_forbidden === 1) {
+        this.isShowRenew = false;
+        return;
+      }
       this.submitLoading = true;
       const params = {
         id: this.id,
-        billing_cycle: this.billing_cycle,
-        customfield: this.customfield,
-        duration_id: this.selected_id,
+        billing_cycle: this.renewParams.billing_cycle,
+        customfield: this.renewParams.customfield,
       };
-      const subApi = this.demand ? apiDemandToPrepayment : apiRenew;
-      subApi(params)
+
+      let apiFun = renew;
+      if (this.isDemandFee) {
+        apiFun = demandToPrepayment;
+        params.duration_id = this.renewActiveId;
+      }
+
+      apiFun(params)
         .then((res) => {
           this.submitLoading = false;
           if (res.data.status === 200) {
             if (res.data.code == "Paid") {
               this.isShowRenew = false;
               this.$message.success(res.data.msg);
-              this.$emit("success");
+              this.$emit("renew-success");
             } else {
               this.isShowRenew = false;
-              this.$emit("pay", res.data.data.id);
+              this.$emit("renew-pay", res.data.data.id, this.renewParams.totalPrice);
             }
           }
         })
@@ -317,9 +399,7 @@ const renewDialog = {
     },
 
     getCommon() {
-      this.commonData = JSON.parse(localStorage.getItem("common_set_before"));
-      this.currency_prefix = this.commonData.currency_prefix;
-      this.currency_suffix = this.commonData.currency_suffix;
+      this.commonData = JSON.parse(localStorage.getItem("common_set_before")) || {};
     },
   },
 };

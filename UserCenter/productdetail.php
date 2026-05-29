@@ -4,7 +4,7 @@
 
 <body>
   <!-- mounted之前显示 -->
-  <div class="product_detail template">
+  <div class="product_detail template" v-cloak>
     <el-container>
       <aside-menu></aside-menu>
       <el-container>
@@ -39,9 +39,12 @@
   </div>
   <!-- =======页面独有======= -->
   <script src="/{$template_catalog}/template/{$themes}/js/common/jquery.mini.js"></script>
-  <script src="/{$template_catalog}/template/{$themes}/components/safeConfirm/safeConfirm.js"></script>
   <script src="/{$template_catalog}/template/{$themes}/components/captchaDialog/captchaDialog.js"></script>
   <script src="/{$template_catalog}/template/{$themes}/components/countDownButton/countDownButton.js"></script>
+  <script
+    src="/{$template_catalog}/template/{$themes}/components/securityVerification/securityVerification.js"></script>
+
+  <script src="/{$template_catalog}/template/{$themes}/components/safeConfirm/safeConfirm.js"></script>
   <script src="/{$template_catalog}/template/{$themes}/components/payDialog/payDialog.js"></script>
   <script src="/{$template_catalog}/template/{$themes}/components/hostStatus/hostStatus.js"></script>
   <script src="/{$template_catalog}/template/{$themes}/components/pagination/pagination.js"></script>
@@ -52,6 +55,8 @@
   <script src="/{$template_catalog}/template/{$themes}/components/autoRenew/autoRenew.js"></script>
   <script src="/{$template_catalog}/template/{$themes}/components/ipDefase/ipDefase.js"></script>
   <script src="/{$template_catalog}/template/{$themes}/components/resetAuth/resetAuth.js"></script>
+  <script src="/{$template_catalog}/template/{$themes}/components/renewDialog/renewDialog.js"></script>
+  <script src="/{$template_catalog}/template/{$themes}/components/unsubscribe/unsubscribe.js"></script>
   <script src="/{$template_catalog}/template/{$themes}/api/product.js"></script>
   <script src="/{$template_catalog}/template/{$themes}/js/productdetail.js"></script>
 

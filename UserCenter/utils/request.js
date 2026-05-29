@@ -1,6 +1,6 @@
 (function () {
   const baseURL = `/console/v1`;
-  const Axios = axios.create({baseURL, timeout: 1000 * 60 * 10});
+  const Axios = axios.create({ baseURL, timeout: 1000 * 60 * 10 });
   Axios.defaults.withCredentials = true;
   // 这里是不需要jwt的页面 例如登录页
   const noNeedJwtUrlArr = [
@@ -21,7 +21,6 @@
   const nowUrl = location.href.split("/").pop();
   const pageRouter = nowUrl.indexOf("?") !== -1 ? nowUrl.split("?")[0] : nowUrl;
   const urlParams = new URLSearchParams(window.location.search);
-
   if (urlParams.get("queryParam")) {
     const jwt = urlParams.get("queryParam");
     localStorage.setItem("jwt", jwt);
@@ -32,17 +31,23 @@
       (urlParams.toString() ? "?" + urlParams.toString() : "");
     window.history.replaceState({}, "", newUrl);
   }
-
+  let iframeToken = undefined;
+  const isIframe = window.self !== window.top;
+  const isGoodsIframe = pageRouter === "goods_iframe.htm";
+  if (isIframe && isGoodsIframe && urlParams.get("iframe_token")) {
+    iframeToken = urlParams.get("iframe_token");
+  }
+  const globalToken = iframeToken ? iframeToken : localStorage.getItem("jwt") ?? undefined;
   // 请求拦截器
   Axios.interceptors.request.use(
     (config) => {
-      if (localStorage.getItem("jwt")) {
+      if (globalToken) {
         config.headers.Authorization =
-          "Bearer" + " " + localStorage.getItem("jwt");
+          "Bearer" + " " + globalToken;
       } else {
         // 浏览器语言
-        const borwserLang = getBrowserLanguage();
-        config.headers.language = borwserLang;
+        config.headers.language =
+          localStorage.getItem("lang") || getBrowserLanguage();
       }
       return config;
     },
@@ -70,7 +75,7 @@
             break;
           case 400:
             if (response.data.data) {
-              const {client_operate_methods, operate_password} =
+              const { client_operate_methods, operate_password } =
                 response.data.data;
               if (client_operate_methods && operate_password) {
                 window.clientOperateVue?.$refs?.safeRef.openDialog(
@@ -100,6 +105,7 @@
             location.href = "/login.htm";
             break;
           case 406:
+            return Promise.reject(response);
             break;
           case 409: // 该管理没有该客户, 跳转首页
             location.href = "";

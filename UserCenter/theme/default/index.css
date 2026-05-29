@@ -1,8 +1,8 @@
 @import url("element-ui.css");
 /* default */
-:root[theme='default'] {
+:root[theme='theme1'] {
   /* 主色 */
-  --color-primary: #1A56DB;
+  --color-primary: #0058ff;
   /* 成功色 */
   --color-success: #059669;
   /* 警告色 */
@@ -16,14 +16,18 @@
   /* 菜单栏背景色 */
   --color-menu-bg: #fff;
   /* 菜单栏选中背景色 */
-  --color-menu-active-bg: #f3f5f6;
+  --color-menu-active-bg: rgba(0, 88, 255, 0.9);
   /* 菜单栏hover背景色 */
-  --color-menu-hover-bg: rgba(255, 255, 255, 0.6);
+  --color-menu-hover-bg: rgba(0, 88, 255, 0.6);
   /* 菜单栏文字颜色 */
-  --color-menu-text: #262626;
+  --color-menu-text: #2B2B2B;
   /* 菜单栏文字选中颜色 */
-  --color-menu-text-active: var(--color-primary);
+  --color-menu-text-active: #fff;
   --color-price-text: #f0142f;
   --color-discount-num: #F99600;
   --color-cash-num: #F0142F;
+}
+:root[theme='theme1'] .line {
+  border: 1px solid #d9d9d9;
+  opacity: 1;
 }

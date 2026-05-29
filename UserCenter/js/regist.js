@@ -41,6 +41,8 @@
           commonData: {},
           register_select_sale: 0,
           salesList: [],
+          emailCodeLoading: false,
+          phoneCodeLoading: false,
         };
       },
       created() {
@@ -180,7 +182,7 @@
               "common_set_before",
               JSON.stringify(res.data.data)
             );
-          } catch (error) {}
+          } catch (error) { }
         },
         // 前往协议
         toService() {
@@ -194,7 +196,7 @@
         // 注册
         doRegist() {
           let isPass = true;
-          const form = {...this.formData};
+          const form = { ...this.formData };
 
           if (this.checked1) {
             if (!this.customfield.sale_number) {
@@ -305,7 +307,7 @@
             if (this.checked1) {
               params.customfield.sale_number = this.customfield.sale_number;
             }
-            const addon_client_custom_field = {...this.ruleForm};
+            const addon_client_custom_field = { ...this.ruleForm };
             this.customFieldList.forEach((item) => {
               if (item.type === "dropdown_text") {
                 addon_client_custom_field[item.id] =
@@ -366,6 +368,9 @@
         },
         // 发送邮箱验证码
         sendEmailCode(isAuto = false) {
+          if (this.emailCodeLoading) {
+            return;
+          }
           const form = this.formData;
           if (!form.email) {
             this.errorText = lang.login_text1;
@@ -401,11 +406,13 @@
           emailCode(params)
             .then((res) => {
               if (res.data.status === 200) {
+                this.emailCodeLoading = false;
                 // 执行倒计时
                 this.$refs.emailCodebtn.countDown();
               }
             })
             .catch((error) => {
+              this.emailCodeLoading = false;
               this.errorText = error.data.msg;
               if (
                 error.data.status === 400 &&
@@ -432,6 +439,9 @@
         },
         // 发送手机短信
         sendPhoneCode(isAuto = false) {
+          if (this.phoneCodeLoading) {
+            return;
+          }
           const form = this.formData;
           if (!form.phone) {
             this.errorText = lang.login_text6;
@@ -468,11 +478,13 @@
           phoneCode(params)
             .then((res) => {
               if (res.data.status === 200) {
+                this.phoneCodeLoading = false;
                 // 执行倒计时
                 this.$refs.phoneCodebtn.countDown();
               }
             })
             .catch((error) => {
+              this.phoneCodeLoading = false;
               this.errorText = error.data.msg;
               if (
                 error.data.status === 400 &&

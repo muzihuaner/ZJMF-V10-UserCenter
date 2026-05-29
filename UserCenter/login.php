@@ -15,6 +15,7 @@
     <div class="ddr ddr4"></div>
     <div class="ddr ddr5"></div>
   </div>
+
   <div class="template">
     <div id="login" v-cloak>
       <div class="login-container">
@@ -102,12 +103,15 @@
                     <!-- <template v-if="isEmailOrPhone">
                     <el-input v-model="formData.emailCode" :placeholder="lang.email_code">
                     </el-input>
-                    <count-down-button ref="emailCodebtn" @click.native="sendEmailCode" my-class="code-btn">
+                    <count-down-button ref="emailCodebtn" @click.native="sendEmailCode" my-class="code-btn" 
+                    :loading="emailCodeLoading"
+                    >
                     </count-down-button>
                   </template> -->
                     <!-- 手机验证码 -->
                     <el-input v-model="formData.phoneCode" :placeholder="lang.login_phone_code"></el-input>
-                    <count-down-button ref="phoneCodebtn" @click.native="sendPhoneCode" my-class="code-btn">
+                    <count-down-button ref="phoneCodebtn" @click.native="sendPhoneCode" my-class="code-btn"
+                      :loading="phoneCodeLoading">
                     </count-down-button>
                   </div>
                 </template>

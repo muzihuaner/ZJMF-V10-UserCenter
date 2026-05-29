@@ -12,6 +12,11 @@
     <script>
         const url = "/{$template_catalog}/template/{$public_themes}/"
         const system_version = "{$system_version}"
+        window.__LANG_CONFIG__ = {
+            lang_home: "{$lang_home}",
+            lang_home_follow_browser: {$lang_home_follow_browser},
+            lang_home_open: {$lang_home_open}
+        };
     </script>
 
     <!-- 模板样式 -->

@@ -340,7 +340,7 @@ function exportExcelFun(res) {
       const fileName = res.headers["content-disposition"]
         .split("filename=")[1]
         .replace(new RegExp('"', "g"), "");
-      const blob = new Blob([res.data], {type: res.headers["content-type"]});
+      const blob = new Blob([res.data], { type: res.headers["content-type"] });
       const downloadElement = document.createElement("a");
       const href = window.URL.createObjectURL(blob); //创建下载的链接
       downloadElement.href = href;

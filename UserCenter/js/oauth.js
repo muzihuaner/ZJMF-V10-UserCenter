@@ -37,6 +37,8 @@
             token: "",
           },
           isWxLogin: false,
+          emailCodeLoading: false,
+          phoneCodeLoading: false,
         };
       },
       created() {
@@ -58,7 +60,7 @@
         document.getElementById("mainLoading").style.display = "none";
         document.getElementsByClassName("template")[0].style.display = "block";
       },
-      updated() {},
+      updated() { },
       watch: {},
       methods: {
         // 验证码验证成功后的回调
@@ -81,7 +83,7 @@
         // 登录
         doLogin() {
           let isPass = true;
-          const form = {...this.formData};
+          const form = { ...this.formData };
           // 邮件登录验证
           if (this.isEmailOrPhone) {
             if (!form.email) {
@@ -247,6 +249,9 @@
         },
         // 发送邮箱验证码
         sendEmailCode() {
+          if (this.emailCodeLoading) {
+            return;
+          }
           let isPass = true;
           const form = this.formData;
           if (!form.email) {
@@ -274,14 +279,17 @@
               token: this.token,
               captcha: this.captcha,
             };
+            this.emailCodeLoading = true;
             emailCode(params)
               .then((res) => {
                 if (res.data.status === 200) {
                   // 执行倒计时
                   this.$refs.emailCodebtn.countDown();
+                  this.emailCodeLoading = false;
                 }
               })
               .catch((err) => {
+                this.emailCodeLoading = false;
                 if (err.data.data && err.data.data?.captcha == 1) {
                   this.isShowCaptcha = true;
                   this.codeAction = "emailCode";
@@ -297,6 +305,9 @@
         },
         // 发送手机短信
         sendPhoneCode() {
+          if (this.phoneCodeLoading) {
+            return;
+          }
           let isPass = true;
           const form = this.formData;
           if (!form.phone) {
@@ -327,14 +338,17 @@
               token: this.token,
               captcha: this.captcha,
             };
+            this.phoneCodeLoading = true;
             phoneCode(params)
               .then((res) => {
                 if (res.data.status === 200) {
                   // 执行倒计时
                   this.$refs.phoneCodebtn.countDown();
+                  this.phoneCodeLoading = false;
                 }
               })
               .catch((err) => {
+                this.phoneCodeLoading = false;
                 if (err.data.data && err.data.data?.captcha == 1) {
                   this.isShowCaptcha = true;
                   this.codeAction = "phoneCode";
@@ -373,7 +387,7 @@
               JSON.stringify(res.data.data)
             );
             localStorage.setItem("lang", this.commonData.lang_home);
-          } catch (error) {}
+          } catch (error) { }
         },
         // 获取前台导航
         doGetMenu() {

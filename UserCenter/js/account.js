@@ -158,14 +158,14 @@
           },
           operaRules: {
             origin_operate_password: [
-              {required: true, message: lang.account_tips1, trigger: "blur"},
+              { required: true, message: lang.account_tips1, trigger: "blur" },
             ],
             operate_password: [
-              {required: true, message: lang.account_tips2, trigger: "blur"},
+              { required: true, message: lang.account_tips2, trigger: "blur" },
             ],
             re_operate_password: [
-              {required: true, message: lang.account_tips3, trigger: "blur"},
-              {validator: validatePass2, trigger: "blur"},
+              { required: true, message: lang.account_tips3, trigger: "blur" },
+              { validator: validatePass2, trigger: "blur" },
             ],
           },
           errorText: "",
@@ -235,6 +235,8 @@
           security_verify_value: "", // 安全验证值
           certify_id: "", // 认证ID
           actionType: "",
+          emailCodeLoading: false,
+          phoneCodeLoading: false,
         };
       },
       watch: {},
@@ -303,7 +305,7 @@
             return;
           }
           let ids = this.multipleSelection.map((item) => item.id);
-          deleteMessage({id: ids}).then((res) => {
+          deleteMessage({ id: ids }).then((res) => {
             if (res.data.status === 200) {
               this.$message.success(res.data.msg);
               this.getMsgList();
@@ -334,7 +336,7 @@
             return;
           }
           let ids = this.multipleSelection.map((item) => item.id);
-          readMessage({id: ids}).then((res) => {
+          readMessage({ id: ids }).then((res) => {
             if (res.data.status === 200) {
               this.$refs.topMenuRef.getMessageList();
               this.$message.success(res.data.msg);
@@ -343,7 +345,7 @@
           });
         },
         handelReadAllMsg() {
-          readMessage({all: 1}).then((res) => {
+          readMessage({ all: 1 }).then((res) => {
             if (res.data.status === 200) {
               this.$message.success(res.data.msg);
               this.$refs.topMenuRef.getMessageList();
@@ -452,7 +454,7 @@
         getAccountList() {
           // 表格加载
           this.loading = true;
-          getLog({...this.params, type: "system"}).then((res) => {
+          getLog({ ...this.params, type: "system" }).then((res) => {
             if (res.data.status === 200) {
               let list = res.data.data.list;
               this.dataList = list;
@@ -801,7 +803,7 @@
             if (valid) {
               this.saveLoading = true;
               const data = this.accountData;
-              const addon_client_custom_field = {...this.ruleForm};
+              const addon_client_custom_field = { ...this.ruleForm };
               this.clientCustomFieldList.forEach((item) => {
                 if (item.type === "dropdown_text") {
                   addon_client_custom_field[item.id] =
@@ -1182,7 +1184,7 @@
         },
         doResetPass() {
           let isPass = true;
-          const form = {...this.formData};
+          const form = { ...this.formData };
           // 邮件登录验证
           if (this.isEmailOrPhone) {
             if (!form.email) {
@@ -1288,6 +1290,9 @@
         },
         // 发送手机验证码
         sendPhoneCode(type) {
+          if (this.phoneCodeLoading) {
+            return;
+          }
           let isPass = true;
           const tpyeConfig = {
             old: {
@@ -1351,6 +1356,7 @@
               this.$refs.captcha.doGetCaptcha();
               return;
             }
+            this.phoneCodeLoading = true;
             phoneCode(params)
               .then((res) => {
                 if (res.data.status === 200) {
@@ -1359,17 +1365,23 @@
                   this.token = "";
                   this.captcha = "";
                   this.$refs[tpyeConfig[type].countDown].countDown();
+                  this.phoneCodeLoading = false;
                 }
               })
               .catch((error) => {
                 this.token = "";
                 this.captcha = "";
                 this.errorText = error.data.msg;
+                this.phoneCodeLoading = false;
+
               });
           }
         },
         // 发送邮箱验证码
         sendEmailCode(type) {
+          if (this.emailCodeLoading) {
+            return;
+          }
           let isPass = true;
           const tpyeConfig = {
             old: {
@@ -1421,6 +1433,7 @@
               return;
             }
             this.errorText = "";
+            this.emailCodeLoading = true;
             emailCode(params)
               .then((res) => {
                 if (res.data.status === 200) {
@@ -1429,12 +1442,14 @@
                   this.token = "";
                   this.captcha = "";
                   this.$refs[tpyeConfig[type].countDown].countDown();
+                  this.emailCodeLoading = false;
                 }
               })
               .catch((error) => {
                 this.token = "";
                 this.captcha = "";
                 this.errorText = error.data.msg;
+                this.emailCodeLoading = false;
               });
           }
         },

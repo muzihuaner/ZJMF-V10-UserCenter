@@ -1,0 +1,151 @@
+/* 售前咨询浮窗 */
+.coin-active-btn {
+  position: fixed;
+  right: 3px;
+  top: 35vh;
+  z-index: 99;
+}
+.coin-active-btn .coin-active-trigger {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 5px;
+  border-radius: 99px;
+  color: #fff;
+  background: var(--color-primary);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(26, 97, 214, 0.2);
+}
+.coin-active-btn .coin-active-trigger.inner {
+  padding: 0;
+}
+.coin-active-btn .coin-active-trigger:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px rgba(26, 97, 214, 0.4);
+  /* 由于@primary-color是CSS变量，less的lighten函数无法直接处理，改为使用filter实现亮色效果 */
+  background: var(--color-primary);
+  filter: brightness(1.08);
+}
+.coin-active-btn .coin-active-trigger:hover .trigger-icon {
+  transform: rotate(5deg);
+  background-color: #f8f9ff;
+}
+.coin-active-btn .coin-active-trigger:hover .trigger-text {
+  letter-spacing: 6px;
+}
+.coin-active-btn .coin-active-trigger .trigger-icon {
+  font-size: 0;
+  padding: 5px;
+  border-radius: 50%;
+  background-color: #fff;
+  transition: all 0.3s ease;
+}
+.coin-active-btn .coin-active-trigger .trigger-icon .icon-svg {
+  width: 16px;
+  height: 16px;
+}
+.coin-active-btn .coin-active-trigger .trigger-text {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  letter-spacing: 5px;
+  font-size: 12px;
+  transition: all 0.3s ease;
+}
+.presales-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+}
+.presales-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+.presales-trigger .trigger-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.presales-trigger .icon-svg {
+  width: 24px;
+  height: 24px;
+}
+/* 弹窗样式 */
+.presales-popover {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+  padding: 0 !important;
+  width: 170px;
+}
+.presales-popover .popper__arrow {
+  border-right-color: #ffffff !important;
+}
+.presales-content-box {
+  padding: 0;
+}
+.presales-content-box + .popper__arrow::after {
+  border-left-color: var(--color-primary) !important;
+}
+.presales-content {
+  background: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.presales-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.presales-item {
+  margin-bottom: 12px;
+  text-align: center;
+  max-width: 200px;
+}
+.presales-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+.presales-item-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  text-align: center;
+  background-color: var(--color-primary);
+  line-height: 34px;
+}
+.presales-item-value {
+  font-size: 13px;
+  color: var(--color-primary);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.presales-item-value span {
+  color: #333;
+  word-break: break-all;
+  font-weight: 500;
+}
+.presales-item-value a:hover {
+  text-decoration: underline;
+}
+/* 二维码图片 */
+.presales-qrcode {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 15px;
+  border-radius: 4px;
+  overflow: hidden;
+}

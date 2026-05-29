@@ -32,6 +32,8 @@
           countryList: [],
           commonData: {},
           codeAction: "emailCode",
+          emailCodeLoading: false,
+          phoneCodeLoading: false,
         };
       },
       created() {
@@ -70,7 +72,7 @@
             const temp = res.data.data;
             this.formData.token = temp.token;
             this.captcha = temp.captcha;
-          } catch (error) {}
+          } catch (error) { }
         },
 
         hadelSafeConfirm(val) {
@@ -80,7 +82,7 @@
         // 注册
         doResetPass() {
           let isPass = true;
-          const form = {...this.formData};
+          const form = { ...this.formData };
           // 邮件登录验证
           if (this.isEmailOrPhone) {
             if (!form.email) {
@@ -273,7 +275,7 @@
               "common_set_before",
               JSON.stringify(res.data.data)
             );
-          } catch (error) {}
+          } catch (error) { }
         },
         // 前往协议
         toService() {
@@ -306,6 +308,9 @@
         },
         // 发送邮箱验证码
         sendEmailCode(isAuto = false) {
+          if (this.emailCodeLoading) {
+            return;
+          }
           const form = this.formData;
           if (!form.email) {
             this.errorText = lang.ali_tips1;
@@ -338,6 +343,7 @@
             token: this.token,
             captcha: this.captcha,
           };
+          this.emailCodeLoading = true;
           emailCode(params)
             .then((res) => {
               if (res.data.status === 200) {
@@ -345,6 +351,7 @@
                 this.token = "";
                 this.captcha = "";
                 this.$refs.emailCodebtn.countDown();
+                this.emailCodeLoading = false;
               }
             })
             .catch((error) => {
@@ -355,12 +362,16 @@
                 this.$refs.captcha.doGetCaptcha();
               } else {
                 this.errorText = error.data.msg;
+                this.emailCodeLoading = false;
               }
               // this.$message.error(error.data.msg);
             });
         },
         // 发送手机短信
         sendPhoneCode(isAuto = false) {
+          if (this.phoneCodeLoading) {
+            return;
+          }
           const form = this.formData;
           if (!form.phone) {
             this.errorText = lang.account_tips43;
@@ -395,6 +406,7 @@
             token: this.token,
             captcha: this.captcha,
           };
+          this.phoneCodeLoading = true;
           phoneCode(params)
             .then((res) => {
               if (res.data.status === 200) {
@@ -402,6 +414,7 @@
                 this.token = "";
                 this.captcha = "";
                 this.$refs.phoneCodebtn.countDown();
+                this.phoneCodeLoading = false;
               }
             })
             .catch((error) => {
@@ -415,6 +428,7 @@
                 this.$refs.captcha.doGetCaptcha();
               } else {
                 this.errorText = error.data.msg;
+                this.phoneCodeLoading = false;
               }
             });
         },

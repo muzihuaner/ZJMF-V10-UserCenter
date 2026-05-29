@@ -15,6 +15,7 @@
     <div class="ddr ddr4"></div>
     <div class="ddr ddr5"></div>
   </div>
+
   <div class="template">
     <div id="login" v-cloak>
       <div class="login-container">
@@ -71,12 +72,12 @@
                   <el-input v-if="isEmailOrPhone" v-model="formData.emailCode"
                     :placeholder="lang.email_code"></el-input>
                   <count-down-button ref="emailCodebtn" @click.native="sendEmailCode" v-if="isEmailOrPhone"
-                    my-class="code-btn"></count-down-button>
+                    my-class="code-btn" :loading="emailCodeLoading"></count-down-button>
                   <!-- 手机验证码 -->
                   <el-input v-if="!isEmailOrPhone" v-model="formData.phoneCode"
                     :placeholder="lang.login_phone_code"></el-input>
                   <count-down-button ref="phoneCodebtn" @click.native="sendPhoneCode" v-if="!isEmailOrPhone"
-                    my-class="code-btn"></count-down-button>
+                    my-class="code-btn" :loading="phoneCodeLoading"></count-down-button>
                 </div>
                 <div class="form-item rember-item">
                   <!-- 1-31 取消原有的记住密码 -->

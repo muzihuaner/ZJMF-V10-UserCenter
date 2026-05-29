@@ -89,7 +89,7 @@ function refund(params) {
   return Axios.post(`/refund`, params);
 }
 // 取消停用
-function cancel(params) {
+function cancelRefund(params) {
   return Axios.put(`/refund/${params.id}/cancel`, params);
 }
 // 获取产品停用信息
@@ -527,4 +527,14 @@ function apiApplyVoucher(params) {
 // 批量修改产品备注
 function apiBatchUpdateHostNotes(params) {
   return Axios.put(`/host/notes/batch`, params);
+}
+
+// 获取售前咨询配置
+function apiPresaleConsultConfig(params) {
+  return Axios.get(`/presale_consult/config`, { params });
+}
+
+// 获取当前用户等级详情
+function apiClientLevelDetail() { 
+  return Axios.get("/client_level");
 }

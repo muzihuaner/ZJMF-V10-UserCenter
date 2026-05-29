@@ -9,9 +9,16 @@ const eventCode = {
               </el-option>
           </el-select>
       </div>
-      <span slot="reference" class="event-text">{{showText}}<i class="el-icon-caret-bottom"></i></span>
+      <template #reference>
+          <el-tooltip v-model="tooltipVisible"  :disabled="!showTooltip" :content="tooltipText" placement="top-end">
+              <span class="event-text">{{showText}}<i class="el-icon-caret-bottom"></i></span>
+          </el-tooltip>
+      </template>
     </el-popover>
-    <span class="event-text" v-if="disabled && options.length > 0">{{showText}}</span>
+    <el-tooltip v-model="tooltipVisible" :disabled="!showTooltip" v-if="disabled && options.length > 0"  :content="tooltipText" placement="top-end">
+      <span class="event-text" >{{showText}}</span>
+    </el-tooltip>
+  
 </div>
           `,
   data() {
@@ -20,16 +27,25 @@ const eventCode = {
       options: [],
       discount: 0,
       visibleShow: false,
+      tooltipVisible: false,
       nowParams: {},
+      showEventId: undefined,
     };
   },
   computed: {
     showText() {
       return this.eventId
         ? this.calcLebal(
-            this.options.filter((item) => item.id === this.eventId)[0]
-          )
+          this.options.filter((item) => item.id === this.eventId)[0]
+        )
         : lang.goods_text6;
+    },
+    showTooltip() {
+      const selectedOption = this.options.find((item) => item.id === this.eventId);
+      return selectedOption && selectedOption.exclude_with_client_level === 1;
+    },
+    tooltipText() {
+      return lang.goods_text7;
     },
   },
   watch: {
@@ -72,11 +88,15 @@ const eventCode = {
       type: Boolean,
       default: false,
     },
+    level_tip: {
+      type: Boolean,
+      default: true,
+    }
   },
   created() {
     this.getEventList();
   },
-  mounted() {},
+  mounted() { },
   methods: {
     calcLebal(item) {
       if (!item) {
@@ -85,13 +105,12 @@ const eventCode = {
       return item.type === "percent"
         ? lang.goods_text1 + " " + item.value + "%"
         : item.type === "reduce"
-        ? lang.goods_text2 + item.full + lang.goods_text3 + " " + item.value
-        : lang.goods_text6;
+          ? lang.goods_text2 + item.full + lang.goods_text3 + " " + item.value
+          : lang.goods_text6;
     },
     getEventList() {
       const params = {
         id: this.product_id,
-        billing_cycle_time: this.billing_cycle_time,
         qty: this.qty,
         amount: this.amount,
         billing_cycle_time: this.billing_cycle_time,
@@ -145,23 +164,18 @@ const eventCode = {
         discount: this.eventId ? this.discount : 0,
         id: this.eventId ? this.eventId : "",
       });
-      // applyEventPromotion({
-      //   event_promotion: this.eventId,
-      //   product_id: this.product_id,
-      //   qty: this.qty,
-      //   amount: this.amount,
-      //   billing_cycle_time: this.billing_cycle_time,
-      // })
-      //   .then((res) => {
-      //     this.discount = res.data.data.discount;
-      //   })
-      //   .catch((err) => {
-      //     this.discount = 0;
-      //     console.log(err.data);
-      //   })
-      //   .finally(() => {
-
-      //   });
+      this.visibleShow = false;
+      if (this.showTooltip) {
+        this.tooltipVisible = true;
+      }
+      // 优化一下，相同的活动，只弹一次
+      if (this.showTooltip && this.level_tip && this.showEventId !== this.eventId) {
+        this.$alert(this.tooltipText, lang.topMenu_text5, {
+          callback: action => {
+          }
+        });
+      }
+      this.showEventId = this.eventId;
     },
     clearPromotion() {
       this.discount = 0;

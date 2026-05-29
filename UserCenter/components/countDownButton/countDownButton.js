@@ -1,7 +1,7 @@
 // 父组件执行该组件的countDown() 实现倒计时
 const countDownButton = {
   template: `
-        <el-button :class="myClass" v-loading="loading" type="primary" :disabled="!flag">{{ flag?  name : num + lang.second_try}}</el-button>
+        <el-button :class="myClass" :loading="loading" type="primary" :disabled="!flag">{{ flag?  name : num + lang.second_try}}</el-button>
         `,
   data() {
     return {
@@ -24,23 +24,32 @@ const countDownButton = {
       default: false,
     },
   },
-  created() {},
+  created() { },
   methods: {
     countDown() {
       this.flag = false;
       this.num = --this.num;
+      if (this.timer) {
+        this.stopCountDown();
+      }
       this.timer = setInterval(() => {
         if (this.num > 1) {
           this.flag = false;
           this.num = --this.num;
         } else {
-          clearInterval(this.timer);
-          this.timer = null;
-          this.flag = true;
-          this.num = 60;
+          this.stopCountDown();
           this.$emit("countend");
         }
       }, 1000);
     },
+    stopCountDown() {
+      clearInterval(this.timer);
+      this.timer = null;
+      this.flag = true;
+      this.num = 60;
+    },
+  },
+  destroyed() {
+    this.stopCountDown();
   },
 };

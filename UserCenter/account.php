@@ -5,7 +5,6 @@
 </head>
 
 <body>
-  <!-- mounted之前显示 -->
   <div id="mainLoading">
     <div class="ddr ddr1"></div>
     <div class="ddr ddr2"></div>
@@ -13,6 +12,7 @@
     <div class="ddr ddr4"></div>
     <div class="ddr ddr5"></div>
   </div>
+
   <div id="account" class="template">
     <el-container>
       <aside-menu :menu-active-id="2" @getruleslist="getRule"></aside-menu>
@@ -536,14 +536,14 @@
                   <el-input v-if="isEmailOrPhone" v-model="formData.emailCode" :placeholder="lang.account_tips8">
                   </el-input>
                   <count-down-button ref="codeEmailCodebtn" @click.native="sendEmailCode('code')" v-if="isEmailOrPhone"
-                    my-class="code-btn"></count-down-button>
+                    my-class="code-btn" :loading="emailCodeLoading"></count-down-button>
                   <!-- <el-button v-if="isEmailOrPhone" class="code-btn" type="primary">获取验证码</el-button> -->
 
                   <!-- 手机验证码 -->
                   <el-input v-if="!isEmailOrPhone" v-model="formData.phoneCode" :placeholder="lang.account_tips9">
                   </el-input>
                   <count-down-button ref="codePhoneCodebtn" @click.native="sendPhoneCode('code')" v-if="!isEmailOrPhone"
-                    my-class="code-btn"></count-down-button>
+                    my-class="code-btn" :loading="phoneCodeLoading"></count-down-button>
                   <!-- <el-button v-if="!isEmailOrPhone" class="code-btn" type="primary">获取验证码</el-button> -->
 
                 </div>
@@ -584,7 +584,7 @@
                       <el-input v-model="phoneData.code">
                       </el-input>
                       <count-down-button ref="phoneCodebtn" @click.native="sendPhoneCode('old')" my-class="code-btn"
-                        slot="append"></count-down-button>
+                        slot="append" :loading="phoneCodeLoading"></count-down-button>
                     </div>
                   </el-form-item>
                   <el-form-item v-show="errorText">
@@ -619,7 +619,7 @@
                       <el-input v-model="rePhoneData.code">
                       </el-input>
                       <count-down-button ref="rePhoneCodebtn" @click.native="sendPhoneCode('new')" my-class="code-btn"
-                        slot="append"></count-down-button>
+                        slot="append" :loading="phoneCodeLoading"></count-down-button>
                     </div>
                   </el-form-item>
                   <el-form-item v-show="errorText">
@@ -650,7 +650,7 @@
                       <el-input v-model="emailData.code">
                       </el-input>
                       <count-down-button ref="emailCodebtn" @click.native="sendEmailCode('old')" my-class="code-btn"
-                        slot="append"></count-down-button>
+                        slot="append" :loading="emailCodeLoading"></count-down-button>
                     </div>
                   </el-form-item>
                   <el-form-item v-show="errorText">
@@ -680,7 +680,7 @@
                       <el-input v-model="reEmailData.code">
                       </el-input>
                       <count-down-button ref="reEmailCodebtn" @click.native="sendEmailCode('new')" my-class="code-btn"
-                        slot="append"></count-down-button>
+                        slot="append" :loading="emailCodeLoading"></count-down-button>
                     </div>
                   </el-form-item>
                   <el-form-item v-show="errorText">

@@ -12,6 +12,7 @@
         rechargeDialog,
         withdrawDialog,
         proofDialog,
+        contractInfo
       },
 
       data() {
@@ -310,7 +311,7 @@
           },
           availableParams: {
             page: 1,
-            limit: 20,
+            limit: 999999,
             pageSizes: [20, 50, 100],
             total: 0,
           },
@@ -819,14 +820,7 @@
           this.isShowCancel = true;
         },
         handeInfo() {
-          getPartInfo().then((res) => {
-            this.infoFormData = { ...res.data.data };
-            this.isShowInfoDia = true;
-          });
-        },
-        infoClose() {
-          this.isShowInfoDia = false;
-          this.$refs.infoForm.resetFields();
+          this.$refs.contractInfo.getContractInfo();
         },
         handelMail(id) {
           this.mailFormData.id = id;
@@ -871,54 +865,7 @@
         cancelClose() {
           this.isShowCancel = false;
         },
-        saveInfoData() {
-          this.$refs.infoForm.validate((valid) => {
-            if (valid) {
-              editPartInfo(this.infoFormData)
-                .then((res) => {
-                  this.infoClose();
-                  this.$message.success(res.data.msg);
-                })
-                .catch((err) => {
-                  this.$message.error(err.data.msg);
-                });
-            }
-          });
-        },
-        // 签章上传前验证
-        beforeSealUpload(file) {
-          const isJPGorPNG = file.type === 'image/jpeg' || file.type === 'image/jpg' || file.type === 'image/png';
-          const isLt3M = file.size / 1024 / 1024 < 3;
 
-          if (!isJPGorPNG) {
-            this.$message.error(lang.finance_text152);
-            return false;
-          }
-          if (!isLt3M) {
-            this.$message.error(lang.finance_text153);
-            return false;
-          }
-        },
-        // 签章上传成功
-        handleSealSuccess(res, file) {
-          if (res.status === 200) {
-            this.infoFormData.company_seal = res.data.save_name;
-            this.infoFormData.company_seal_url = res.data.image_url;
-            this.$message.success(lang.finance_text154);
-          } else {
-            this.$message.error(res.msg || lang.finance_text155);
-          }
-        },
-        // 签章预览
-        handleSealPreview() {
-          this.sealPreviewVisible = true;
-        },
-        // 签章删除
-        handleSealDelete() {
-          this.infoFormData.company_seal = '';
-          this.infoFormData.company_seal_url = '';
-          this.$message.success(lang.finance_text157);
-        },
         // 自动触发一次
         getRule(arr) {
           let isShow1 = this.showFun(arr, "OrderController::index");

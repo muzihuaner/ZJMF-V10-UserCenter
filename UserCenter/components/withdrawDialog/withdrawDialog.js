@@ -25,8 +25,8 @@ const withdrawDialog = {
               </el-form-item>
             </template>
             <el-form-item :label="lang.withdraw_label5" >
-                <el-input @keyup.native="withdrawForm.amount=oninput(withdrawForm.amount)" class="input-select amount-input" v-model="withdrawForm.amount" :placeholder="lang.withdraw_placeholder5 + currency_prefix + ruler.withdrawable_amount">
-                    <el-button class="all-btn" type="text" slot="suffix" @click="withdrawForm.amount=ruler.withdrawable_amount">{{lang.withdraw_btn3}}
+                <el-input :disabled="ruler.source == 'deposit'" @keyup.native="withdrawForm.amount=oninput(withdrawForm.amount)" class="input-select amount-input" v-model="withdrawForm.amount" :placeholder="lang.withdraw_placeholder5 + currency_prefix + ruler.withdrawable_amount">
+                    <el-button v-if="ruler.source != 'deposit'" class="all-btn" type="text" slot="suffix" @click="withdrawForm.amount=ruler.withdrawable_amount">{{lang.withdraw_btn3}}
                     </el-button>
                 </el-input>
             </el-form-item>
@@ -36,7 +36,7 @@ const withdrawDialog = {
             </el-form-item>
         </el-form>
     </div>
-    <div class="withdraw-rule">
+    <div class="withdraw-rule" v-if="ruler.source != 'deposit'">
         <div class="label">{{lang.withdraw_title2}}</div>
         <div class="rules">
             <div class="rules-item" v-if="ruler.withdraw_min || ruler.withdraw_max">
@@ -63,6 +63,7 @@ const withdrawDialog = {
     </span>
 </el-dialog>
     `,
+
   data() {
     return {
       // 提现弹窗开始
@@ -133,7 +134,9 @@ const withdrawDialog = {
       // this.withdrawForm.method_id = ruler.method[0].id
       this.methodChange(this.withdrawForm.method_id);
       this.ruler = ruler;
-
+      if (ruler.source == "deposit") {
+        this.withdrawForm.amount = this.oninput(ruler.withdrawable_amount);
+      }
       this.withdrawVisible = true;
       this.errText = "";
     },
